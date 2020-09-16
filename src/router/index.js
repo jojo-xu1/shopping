@@ -2,6 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import HomePage from '@/components/main/HomePage.vue'
 import InfoPage from '@/components/main/InfoPage.vue'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+Vue.use(VueAxios,axios)
 Vue.use(Router)
 const originalPush = Router.prototype.push
 Router.prototype.push = function push(location) {
@@ -16,11 +20,11 @@ export default new Router({
     },
     {
       path: '/info/:infoId/page/:pageId',
-      name: 'main',
+      name: 'infopage',
       component: InfoPage
     },
     {
-      path: '/main/:grpid',
+      path: '/main/:cat_id',
       name: 'main',
       component: HomePage
     },

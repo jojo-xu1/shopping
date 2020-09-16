@@ -3,7 +3,7 @@
 
     <el-row style=" height: 100%;margin-top:0px;margin-left:0px;">
   <el-col :span="18" style=" height: 100%;margin-top:0px;margin-left:0px;">
-      <div id="imgbox" class="imgbox" :style="{'background-image': 'url(' + phtgrps[activePhtGrp].mainimg + ')'}">
+      <div id="imgbox" class="imgbox" :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + phtgrps[activePhtGrp].catimg_path + ')'}">
 
             <table height=100% width=100%><tr>
               <td align=center width=5%>
@@ -18,43 +18,40 @@
                 <div style="{height:380px}"  @mouseover="showIndex = 2" @mouseout="showIndex = 0" @click="showIndex = 2" :class="{'div-b':showIndex == 2}">
                   <span class="span-b" @click="movePhotoGrp( 1 )">&gt;&gt;</span>
                </div>
-              </td>
+              </td>                            
             </tr></table>
 
-        <el-tooltip placement="top" v-for="(lbl, key) in phtgrps[activePhtGrp].lbls"  v-bind:key="key">
-        <div slot="content" style="text-align: center">{{lbl.name}}<br/>原産地: <br/>価格:</div>
-        <div class="goodslbl"  :style="{ top: lbl.topy + 'px', left: lbl.leftx + 'px' }"   @click="open(lbl)">
+        <div class="goodslbl" v-for="(lbl, key) in curLbls"  v-bind:key="key" :style="{ top: (imgheight * lbl.lbl_pst_y) + 'px', left: (imgwidth*lbl.lbl_pst_x) + 'px' }"  @mouseover="showLbl(lbl)" @mouseout="hid"  @click="openLbl(lbl)">
             <table height=100% width=100%><tr><td align=center>
-              <span class="lblfont">{{lbl.name}}</span>
+              <span class="lblfont">{{lbl.goods_name}}</span>
             </td></tr></table>
         </div>
-        </el-tooltip>
 
     </div>
   </el-col>
   <el-col :span="6">
-    <div class="infoMian" v-if="isInit">
+    <div class="infoMian scoll-1" v-if="isInit">
         <div class="info">
           <div v-for="(item, key) in gdsDetail.items"  v-bind:key="key">
             <center>
             <table width=90%>
               <tr>
                 <td colspan=2>
-                  <label >{{item.name}}</label>
-                  <div v-if="item.desp">
-                    <span class="itemdesp" >{{item.desp}}</span>
+                  <label >{{item.item_name}}</label>
+                  <div v-if="item.item_desp">
+                    <span class="itemdesp" >{{item.item_desp}}</span>
                   </div>
                 </td>
               </tr>
               <tr>
               <td width=50%>
-                <img :src="item.src" height="100px" width="100px"/>
+                <img :src="'http://13.112.112.160/shopping/upimg/' +item.itemimg" height="100px" width="100px"/>
               </td>
               <td width=50% align=right class="goodsfont">
                   本体価格<br /> {{item.price}} 円 <br />
                   税込価格<br /> {{item.taxprice}} 円 <br />
                   <el-button type="success" plain >購入</el-button>
-              </td>
+              </td>            
             </tr>
             </table>
             </center>
@@ -62,14 +59,14 @@
           <p></p>
           <center>
             <table width=90%><tr><td>
-              <label >{{gdsDetail.name}}のお薦めレシビ：</label>
+              <label >{{gdsDetail.goods_name}}のお薦めレシビ：</label>
               <div  v-for="(lnk,key) in gdsDetail.links"  v-bind:key="key" >
                 <br>
-                <a class="rsblnk" @click="dispPop(lnk)">{{lnk.title}}</a><br/>
-                <span class="itemdesp" v-if="lnk.text">{{lnk.text}}</span><br/>
-                <img :src="lnk.src" height="100px" width="100px"/>
+                <a class="rsblnk" @click="dispPop(lnk)">{{lnk.rsp_name}}</a><br/>
+                <span class="itemdesp" v-if="lnk.text">{{lnk.rep_desp}}</span><br/>
+                <img :src="'http://13.112.112.160/shopping/upimg/' + lnk.rsp_img" height="100px" width="100px"/>
                 <br>
-
+                
                 <p>
                 </p>
               </div>
@@ -77,10 +74,10 @@
           </center>
         </div>
       </div>
-      <div v-else class="infoMian">
+      <div v-else class="infoMian scoll-1">
           <div >
-             <div  v-for="(lbl, key) in phtgrps[activePhtGrp].cmimgs"  v-bind:key="key" >
-              <img class="cmimg" :src="lbl.imgsrc" :alt="lbl.cmtitle">
+             <div  v-for="(cm, key) in cmall"  v-bind:key="key" >
+              <img class="cmimg" :src="'http://13.112.112.160/shopping/upimg/' + cm.cm_img" :alt="cm.cm_title">
             </div>
 
           </div>
@@ -89,11 +86,17 @@
 </el-row>
 
   <!-- GoodsTip -->
-
+  <div class="tips" id="tips" hidden="true">
+      <label > {{gdsTips.name}}</label>
+      <br/>
+      <label >原産地：</label> {{gdsTips.sanchi}}
+      <br>
+       <label >価格：</label>{{gdsTips.price}}
+  </div>
 
   <!-- レシビPOP -->
   <infoPop :show="show" :title="title" :rspid="rspid" @hidePop="hidePop" @submitPop="submitPop">
-
+  
   </infoPop>
 
   </div>
@@ -110,8 +113,8 @@ export default {
     return {
 
       isInit:false,
-      imgheight:'',
-      imgwidth:'',
+      imgheight:600,
+      imgwidth:800,
       x:'',
       y:'',
       gdsDetail:{
@@ -129,33 +132,40 @@ export default {
       show: false,
       rspid:'',
       showIndex:0,
-      phtgrps:[
-      ],
+      phtgrps:[{catimg_id:0, catimg_path:'', catimg_mini:'',cat_id:0}],
+      lbls:[{lbl_id:0,catimg_id:0,goods_id:0,lbl_pst_x:0,lbl_pst_y:0,cat_id:0,goods_name:''}],
+      curLbls:[],
+      itemall:[{item_id:0,item_name:'',goods_id:0,item_desp:'',price:0,taxprice:0,itemimg:''}],
+      cmall:[{cm_id:0,cat_id:0,cm_title:'',cm_img:''}],
       activePhtGrp:0,
     }
   },
   components: {
         infoPop
-  },
+  },  
   beforeRouteUpdate(to,from,next){
-    //alert("router changed:" + to.params.grpid );
-    this.setInit( to.params.grpid );
+    //alert("router changed:" + to.params.cat_id );
+    this.setInit( to.params.cat_id );
     next();
-  },
+  },  
+ 
   created:function () {
-    // 手动发起的post请求，默认没有表单格式
-    //通过post的第三个参数：emulateJSON: true，设置提交的内容类型为普通表单数据格式
-    //alert("post start:" );
-    var url = 'http://101.200.49.149/negdev/shop/goodsgrp.jsp';
-    this.setInit( 1 );
-
+    if(this.$route.query) {
+      var cat_id = ""
+      cat_id = this.$route.params.cat_id;
+      console.log("Homepage created cat_id:" + cat_id)
+      this.setInit( 7 );
+    }
+    //
 
 　},
   mounted:function(){
     var imgbox=document.getElementById("imgbox");
-
+    console.log("imgbox.clientHeight:" + imgbox.clientHeight)
     this.imgheight=imgbox.clientHeight;
     this.imgwidth=imgbox.clientWidth;
+
+    console.log("imgbox.clientHeight:" + this.imgheight)
 
     this.x=(this.imgwidth/632);
     this.y=(this.imgheight/508);
@@ -163,9 +173,30 @@ export default {
   },
 
   methods: {
-    open(lbl){
+    async openLbl(lbl){
       this.gdsDetail = lbl;
+      this.gdsDetail.items = this.getGoodsItems( lbl.goods_id )
+      this.gdsDetail.links = await this.getGoodsRsp( lbl.goods_id )
+      console.log( "openLbl links.length: " +  this.gdsDetail.links.length )
       this.isInit=true;
+    },
+    showLbl(lbl,event){
+      var tips=document.getElementById("tips");
+      var e = event || window.event;
+      var x=e.screenX;
+      var y=e.screenY;
+      tips.style.left=(x-45)+"px";
+      tips.style.top=y-150+"px";
+      // 设定显示的值
+      //this.gdsDetail.name = lbl.name;
+      //this.gdsDetail.sanchi = lbl.sanchi;
+      this.gdsTips = lbl;
+      tips.hidden=false;
+      console.log();
+    },
+    hid(){
+      var tips=document.getElementById("tips");
+      tips.hidden=true;
     },
     // レシピ紹介POPの表示
     dispPop(lnk){
@@ -190,202 +221,122 @@ export default {
 
       if( this.activePhtGrp < 0 ) this.activePhtGrp = this.phtgrps.length-1;
       if( this.activePhtGrp > this.phtgrps.length-1 ) this.activePhtGrp = 0;
+      this.getCurLbls()
       // 显示CM
       this.isInit=false;
 
     },
-    setInit( grpid ){
-      if( grpid < 10 ){
-        this.phtgrps = [
-
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/ys-03.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-                  {
-                    'id':'3','name':'胡瓜',
-                    'topy':'230','leftx':'445',
-                    'items':[
-                      {
-                      'id':'3-1','name':'福島・山梨県などの国内産 きゅうり 1本',
-                      'desp':'',
-                      'src':'http://netengine.co.jp/static/upimg/goods/kyuri1.jpg',
-                      'sanchi':'茨城県',
-                      'price':'68',
-                      'taxprice':'73',
-                      },
-                      {
-                      'id':'3-2','name':'国内産 きゅうり 3本入 1袋',
-                      'desp':'山梨県などの国内産きゅうり、お買い得の3本入り',
-                      'src':'http://netengine.co.jp/static/upimg/goods/kyuri3.jpg',
-                      'sanchi':'茨城県',
-                      'price':'204',
-                      'taxprice':'220',
-                      },
-                    ],
-                    'links':[
-                      {'rid':'20',
-                      'title':'きゅうりとちくわのラー油炒め',
-                      'link':'/info/1/page/2',
-                      'src':'http://netengine.co.jp/static/upimg/rsp/rspkyuri01.jpg',
-                      'text':'きゅうりを炒めておつまみやお弁当にぴったりのおかずにしました。簡単なので1品追加したい時にもおすすめです。'
-                      },
-                      {'rid':'21',
-                      'title':'簡単！蛇腹キュウリとタコの酢の物',
-                      'link':'/info/1/page/1',
-                      'src':'http://netengine.co.jp/static/upimg/rsp/rspkyuri02.jpg',
-                      'text':'お好みでワカメを入れても美味しいと思います。'
-                      }
-                      ],
-                  },
-
-            ],
-          },
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/ys-04.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-
-                ],
-          },
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/ys-05.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-
-                ],
-          },
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/ys-06.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-                ],
-          },
-
-
-        ];
-      }else{
-        this.phtgrps = [
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/cml01.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'4',
-              imgsrc:'../../assets/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-
-                ],
-          },
-
-          {
-          mainimg:'http://netengine.co.jp/static/upimg/shop/cml02.jpg',
-          cmimgs:[
-            {
-              cmid:'1',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm2.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'2',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm3.png',
-              cmtitle:'',
-            },
-            {
-              cmid:'3',
-              imgsrc:'http://101.200.49.149/negdev/img/upimg/cm/cm1.png',
-              cmtitle:'',
-            },
-          ],
-          lbls: [
-
-                ],
-          },
-        ];
+    getCurLbls(){
+      console.log("getCurLbls, this.lbls.length:" + this.lbls.length)
+      this.curLbls = []
+      for(var i in this.lbls){
+        console.log("this.lbls[i].cat_id:" + this.lbls[i].cat_id)
+        console.log("this.phtgrps[this.activePhtGrp].cat_id:" + this.phtgrps[this.activePhtGrp].cat_id)
+        if( this.lbls[i].catimg_id == this.phtgrps[this.activePhtGrp].catimg_id){
+          console.log("getCurLbls add lbl")
+          this.curLbls.push( this.lbls[i])
+        }
+          
       }
-
+    },
+    getGoodsItems( gid ){
+      console.log("getGoodsItems start")
+      var itms = []
+      for(var i in this.itemall){
+        if( this.itemall[i].goods_id == gid ){
+          console.log("getGoodsItems add item")
+          itms.push( this.itemall[i])
+        }
+      }
+      return itms
+    },   
+    async getGoodsRsp( gid ){
+      console.log("getGoodsRsp start")
+      var rsps = []
+      var sql = "select distinct a.rsp_id, a.rsp_name, a.rep_desp ,a.rsp_img, a.rsp_metial"
+      sql += " from ns_rsp a"
+      sql += " left join ns_rspgoods g on g.rsp_id = a.rsp_id and g.goods_id = " + gid
+      sql += " where g.goods_id = " + gid
+      var req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log(response.data)
+        rsps = response.data.data
+      }).catch((response)=>{
+        console.log("Homepage getGoodsRsp  error!" + response);
+      })
+      return rsps
+    },       
+    async setInit( cat_id ){
+      console.log( "Homepage setInit cat_id:" + cat_id )
+      var req = {
+        "mode":"select",
+        "selectsql":"select catimg_id, catimg_path, catimg_mini,cat_id from ns_catimg where cat_id=" + cat_id
+      }
+      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log(response.data)
+        this.phtgrps = response.data.data
+      }).catch((response)=>{
+        console.log("Homepage setInit get ns_catimg error!" + response);
+      })
       this.activePhtGrp=0;
+
+      // labelを取得する
+      this.lbls = [];
+      var sql = "select a.lbl_id,a.catimg_id,a.goods_id,a.lbl_pst_x,a.lbl_pst_y,c.cat_id"
+	    sql += ",g.goods_name"
+      sql += " from ns_lbl a"
+      sql += " left join ns_catimg c on c.catimg_id = a.catimg_id"
+      sql += " left join ns_goods g on g.goods_id = a.goods_id"
+      sql += " where c.cat_id = " + cat_id
+      req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log(response.data)
+        this.lbls = response.data.data
+      }).catch((response)=>{
+        console.log("Homepage setInit get ns_lbl error!" + response);
+      })
+      this.getCurLbls()
+
+      //商品品目を取得する
+      this.items = [];
+      var sql = "select a.item_id,a.item_name,a.goods_id,g.cat_id"
+      sql += " ,a.item_desp,a.price,a.taxprice,a.itemimg"
+      sql += " from ns_item a"
+      sql += " left join ns_goods g on g.goods_id = a.goods_id"
+      sql += " where g.cat_id = " + cat_id
+      req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log(response.data)
+        this.itemall = response.data.data
+      }).catch((response)=>{
+        console.log("Homepage setInit get ns_lbl error!" + response);
+      })
+
+      //広告を取得する
+      this.items = [];
+      var sql = "select a.cm_id,a.cat_id,a.cm_title,a.cm_img"
+      sql += " from ns_cm a"
+      sql += " where a.cat_id = " + cat_id
+      req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log(response.data)
+        this.cmall = response.data.data
+      }).catch((response)=>{
+        console.log("Homepage setInit get ns_cm error!" + response);
+      })
+
       // 显示CM
       this.isInit=false;
     }
@@ -419,6 +370,20 @@ export default {
   height: 92vh;
   overflow-y:auto;
 }
+.scoll-1::-webkit-scrollbar {/*滚动条整体样式*/
+        width: 5px;     /*高宽分别对应横竖滚动条的尺寸*/
+        height: 1px;
+    }
+.scoll-1::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+        border-radius: 5px;
+         -webkit-box-shadow: inset 0 0 2px rgba(99, 218, 44, 0.5);
+        background: #aae4b7;
+    }
+.scoll-1::-webkit-scrollbar-track {/*滚动条里面轨道*/
+        -webkit-box-shadow: inset 0 0 2px rgba(99, 218, 44, 0.5);
+        border-radius: 5px;
+        background: #e9dede;
+    }
 .cmimg{
   width: 100%;
 }
@@ -450,38 +415,15 @@ export default {
   color: rgb(151, 54, 130);
   font-size: 12px;
 }
-.div-b{
+.div-b{ 
   height: 380px;
   text-align: center;
   line-height: 380px;
   background:rgb(0, 255, 157);padding:5px;color:#FFF;
   filter:alpha(Opacity=60);-moz-opacity:0.6;opacity: 0.6
-}
-.span-b{
+} 
+.span-b{ 
   background:rgb(0, 255, 157);padding:5px;color:#000;
   filter:alpha(Opacity=30);-moz-opacity:0.3;opacity: 0.3
-}
-.infoMian::-webkit-scrollbar {
-  width: 10px;
-  height: 1px;
-}
-.infoMian::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: skyblue;
-  background-image: -webkit-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.2) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(255, 255, 255, 0.2) 75%,
-      transparent 75%,
-      transparent
-  );
-}
-.infoMian::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  background: #ededed;
-  border-radius: 10px;
-}
+} 
 </style>
