@@ -95,7 +95,7 @@ export default {
         if (parentid === this.listall[prop].parent_id) { nlist.push(this.listall[prop]) }
       }
       return nlist
-    },    
+    },
     handleNodeClick(node,data,value) {
       if(node.parent_id !== 0 ){
           console.log("node.cat_id:" + node.cat_id)
@@ -106,7 +106,7 @@ export default {
                     cat_id:node.cat_id
               }
           })
-      } 
+      }
     },
      handleScroll() {
       //注意不同浏览器之间的兼容性
