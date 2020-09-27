@@ -257,7 +257,7 @@ export default {
       var sql = "select distinct a.rsp_id, a.rsp_name, a.rep_desp ,a.rsp_img, a.rsp_metial"
       sql += " from ns_rsp a"
       sql += " left join ns_rspgoods g on g.rsp_id = a.rsp_id and g.goods_id = " + gid
-      sql += " where g.goods_id = " + gid
+      sql += " where (a.delflg is null or a.delflg <> '1') and g.goods_id = " + gid
       var req = {
         "mode":"select",
         "selectsql":sql
@@ -312,7 +312,7 @@ export default {
       sql += " ,a.item_desp,a.price,a.taxprice,a.itemimg"
       sql += " from ns_item a"
       sql += " left join ns_goods g on g.goods_id = a.goods_id"
-      sql += " where g.cat_id = " + cat_id
+      sql += " where (a.delflg is null or a.delflg <> '1') and g.cat_id = " + cat_id
       req = {
         "mode":"select",
         "selectsql":sql
