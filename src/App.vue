@@ -90,6 +90,7 @@ export default {
       return resolve(this.getnode(node.data.cat_id))
     },
     getnode(parentid) {
+      console.log("enter getnode"+parentid)
       var nlist = []
       for (var prop in this.listall) {
         if (parentid === this.listall[prop].parent_id) { nlist.push(this.listall[prop]) }
@@ -98,7 +99,7 @@ export default {
     },
     handleNodeClick(node,data,value) {
       if(node.parent_id !== 0 ){
-          console.log("node.cat_id:" + node.cat_id)
+          console.log("node.cat_id111:" + node.cat_id)
           //this.$router.push({name:'main',params:{cat_id:node.cat_id}})
           this.$router.push({
               path:"/main/" + node.cat_id,//这个path就是你在router/index.js里边配置的路径
