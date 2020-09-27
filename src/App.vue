@@ -77,7 +77,7 @@ export default {
       if (node.level === 0) {
         var req = {
           "mode":"select",
-          "selectsql":"select cat_id, cat_name, parent_id from ns_cat"
+          "selectsql":"select cat_id, cat_name, parent_id from ns_cat where delflg is null or delflg <> '1'"
         }
         await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
           console.log(response.data)
