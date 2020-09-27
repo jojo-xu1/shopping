@@ -151,10 +151,11 @@ export default {
  
   created:function () {
     if(this.$route.query) {
+      console.log("I am not here")
       var cat_id = ""
       cat_id = this.$route.params.cat_id;
       console.log("Homepage created cat_id:" + cat_id)
-      this.setInit( 7 );
+      this.setInit(5);
     }
     //
 
@@ -191,7 +192,7 @@ export default {
       //this.gdsDetail.name = lbl.name;
       //this.gdsDetail.sanchi = lbl.sanchi;
       this.gdsTips = lbl;
-      tips.hidden=false;
+      //tips.hidden=false;
       console.log();
     },
     hid(){
@@ -227,7 +228,7 @@ export default {
 
     },
     getCurLbls(){
-      console.log("getCurLbls, this.lbls.length:" + this.lbls.length)
+      //console.log("getCurLbls, this.lbls.length:" + this.lbls.length)
       this.curLbls = []
       for(var i in this.lbls){
         console.log("this.lbls[i].cat_id:" + this.lbls[i].cat_id)
@@ -271,6 +272,7 @@ export default {
     },       
     async setInit( cat_id ){
       console.log( "Homepage setInit cat_id:" + cat_id )
+      console.log( "i am there")
       var req = {
         "mode":"select",
         "selectsql":"select catimg_id, catimg_path, catimg_mini,cat_id from ns_catimg where cat_id=" + cat_id
@@ -284,13 +286,14 @@ export default {
       this.activePhtGrp=0;
 
       // labelを取得する
+      console.log("i am here")
       this.lbls = [];
       var sql = "select a.lbl_id,a.catimg_id,a.goods_id,a.lbl_pst_x,a.lbl_pst_y,c.cat_id"
 	    sql += ",g.goods_name"
       sql += " from ns_lbl a"
       sql += " left join ns_catimg c on c.catimg_id = a.catimg_id"
       sql += " left join ns_goods g on g.goods_id = a.goods_id"
-      sql += " where c.cat_id = " + cat_id
+      sql += " where (a.delflg is null or a.delflg <> '1') and c.cat_id = " + cat_id
       req = {
         "mode":"select",
         "selectsql":sql
@@ -348,17 +351,17 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .goodslbl{
-    background-image: url(http://101.200.49.149/negdev/img/static/timg.jpg);
+    background-image: url('../../assets/tag.gif');
     background-repeat: no-repeat;
     background-size: 100% 100%;
     position:absolute;
-    width:50px;
-    height:40px;
+    width:120px;
+    height:80px;
     opacity:0.9;
     display:table-cell;
 }
 .lblfont{
-  font-size: 9px;
+  font-size: 16px;
 }
 .goodsfont{
   font-size: 10px;
