@@ -288,10 +288,9 @@ export default {
       // labelを取得する
       console.log("i am here")
       this.lbls = [];
-      var sql = 'select l.lbl_id,l.catimg_id,l.sales_type, l.goods_id,a.lblpos_id,a.lbl_pst_x,a.lbl_pst_y,c.cat_id'
+      var sql = 'select l.lbl_id,l.catimg_id,l.sales_type, l.goods_id,l.lbl_pst_x,l.lbl_pst_y,c.cat_id'
       sql += ',g.goods_name'
       sql += ' from ns_label l'
-      sql += ' inner join ns_lblpos a on a.lblpos_id = l.lblpos_id'
       sql += ' left join ns_catimg c on c.catimg_id = l.catimg_id'
       sql += ' left join ns_goods g on g.goods_id = l.goods_id'
       sql += ' where (l.delflg is null or l.delflg <> 1) and c.cat_id = ' + cat_id
