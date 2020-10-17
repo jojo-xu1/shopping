@@ -3,28 +3,45 @@
 
     <el-row style=" height: 100%;margin-top:0px;margin-left:0px;">
   <el-col :span="18" style=" height: 100%;margin-top:0px;margin-left:0px;">
-      <div id="imgbox" class="imgbox" :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + phtgrps[activePhtGrp].catimg_path + ')'}">
+      <div @click="bigImgClick" id="imgbox" class="imgbox" :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + phtall[activePhtGrp].catimg_path + ')'}">
 
-            <table height=100% width=100%><tr>
+            <table height=100% width=100%>
+              <tr >
               <td align=center width=5%>
-                <div style="{height:380px}"  @mouseover="showIndex = 1" @mouseout="showIndex = 0" @click="showIndex = 1" :class="{'div-b':showIndex == 1}">
-                  <span class="span-b" @click="movePhotoGrp( 0 )">&lt;&lt;</span>
+                <div :style="{height:'380px',display:slideShow}"  @mouseover="showIndex = 1" @mouseout="showIndex = 0" @click="movePhotoGrp( 0 )" :class="{'div-b':showIndex == 1}">
+                  <span class="span-b" >&lt;&lt;</span>
                </div>
               </td>
               <td align=center width=90%>
 
               </td>
               <td align=center width=5%>
-                <div style="{height:380px}"  @mouseover="showIndex = 2" @mouseout="showIndex = 0" @click="showIndex = 2" :class="{'div-b':showIndex == 2}">
-                  <span class="span-b" @click="movePhotoGrp( 1 )">&gt;&gt;</span>
+                <div :style="{height:'380px',display:slideShow}"  @mouseover="showIndex = 2" @mouseout="showIndex = 0" @click="movePhotoGrp( 1 )" :class="{'div-b':showIndex == 2}">
+                  <span class="span-b">&gt;&gt;</span>
                </div>
               </td>                            
-            </tr></table>
+            </tr>
+            </table>
 
-        <div class="goodslbl" v-for="(lbl, key) in curLbls"  v-bind:key="key" :style="{ top: (imgheight * lbl.lbl_pst_y) + 'px', left: (imgwidth*lbl.lbl_pst_x) + 'px' }"  @mouseover="showLbl(lbl)" @mouseout="hid"  @click="openLbl(lbl)">
+        <div class="goodslbl" v-for="(lbl, key) in curLbls"  v-bind:key="key" :style="{ display:lblShow, top: (imgheight * lbl.lbl_pst_y) + 'px', left: (imgwidth*lbl.lbl_pst_x) + 'px', 'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + getLblImg(lbl.sales_type) + ')' }"  @mouseover="showLbl(lbl)" @mouseout="hid"  @click="openLbl(lbl)" >
             <table height=100% width=100%><tr><td align=center>
               <span class="lblfont">{{lbl.goods_name}}</span>
             </td></tr></table>
+        </div>
+
+        <!-- Slide -->
+        <div class="slidediv" :style="{display:slideShow}">
+          <el-slider
+            v-model="slideModel"
+            :format-tooltip="formatSlideTip"
+            :max="slideAmount"
+            :show-tooltip="false"
+            @change="slideChange">
+          </el-slider>
+        </div>
+
+        <div class='slideImg' :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + nowSlideImg + ')', top: '38px', left: slideImgLeft + 'px', display:slideImgShow}">
+
         </div>
 
     </div>
@@ -132,21 +149,49 @@ export default {
       show: false,
       rspid:'',
       showIndex:0,
-      phtgrps:[{catimg_id:0, catimg_path:'', catimg_mini:'',cat_id:0}],
       lbls:[{lbl_id:0,catimg_id:0,goods_id:0,lbl_pst_x:0,lbl_pst_y:0,cat_id:0,goods_name:''}],
       curLbls:[],
       itemall:[{item_id:0,item_name:'',goods_id:0,item_desp:'',price:0,taxprice:0,itemimg:''}],
       cmall:[{cm_id:0,cat_id:0,cm_title:'',cm_img:''}],
+      lbltypelist:[{sales_type:'',lbl_path:'',lbl_name:''}],
       activePhtGrp:0,
+      slideModel:0,
+      nowSlideImg:'',
+      slideAmount:3,
+      slideImgLeft:5,
+      slideImgShow:'none',
+      slideMoved:false,
+      slideShow:'block',
+      lblShow:'block',
+      currentCat:5,
+      phtall:[{catimg_id:0, catimg_path:'', catimg_mini:'',cat_id:0}],
     }
   },
   components: {
         infoPop
   },  
   beforeRouteUpdate(to,from,next){
-    //alert("router changed:" + to.params.cat_id );
-    this.setInit( to.params.cat_id );
+    console.log("router changed:" + to.params.cat_id );
+    if(this.currentCat !== to.params.cat_id){
+      this.currentCat = to.params.cat_id
+      this.setInit( this.currentCat );
+    }else{
+      this.getCurLbls()
+    }
+    //activePhtGrp
+    this.activePhtGrp = 0
+    for(var i in this.phtall){
+      if( this.phtall[i].cat_id == to.params.cat_id){
+        this.activePhtGrp = i
+        break
+      }
+    }
+    console.log("beforeRouteUpdate this.activePhtGrp:" + this.activePhtGrp );
+    console.log("beforeRouteUpdate this.currentCat:" + this.currentCat );    
+    
+
     next();
+    //this.slideModel = this.activePhtGrp
   },  
  
   created:function () {
@@ -155,7 +200,10 @@ export default {
       var cat_id = ""
       cat_id = this.$route.params.cat_id;
       console.log("Homepage created cat_id:" + cat_id)
-      this.setInit(5);
+      this.currentCat = 5
+      this.activePhtGrp = 0
+      //this.slideModel = 0
+      //this.setInit(this.currentCat);
     }
     //
 
@@ -170,6 +218,42 @@ export default {
 
     this.x=(this.imgwidth/632);
     this.y=(this.imgheight/508);
+
+    //ラベル画像取得
+    //lbltypelist:[{sales_type:'',lbl_path:'',lbl_name:''}],
+      var sql = "select distinct sales_type, lbl_path, lbl_name"
+      sql += " from ns_label_img"
+      sql += " where (delflg is null or delflg <> '1') "
+      var req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log("lbltypelist get data:" , response.data)
+        this.lbltypelist = response.data.data
+      }).catch((response)=>{
+        console.log("lbltypelist  error!" + response);
+      })
+
+    //すべて画像取得
+      sql = "select catimg_id, catimg_path, catimg_mini,cat_id from ns_catimg "
+      sql += " where (delflg is null or delflg <> '1') "
+      req = {
+        "mode":"select",
+        "selectsql":sql
+      }
+      this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        console.log("すべて画像取得 get data:" , response.data)
+        this.phtall = response.data.data
+        this.slideAmount = this.phtall.length-1
+      }).catch((response)=>{
+        console.log("すべて画像取得  error!" + response);
+      })
+
+      //
+      this.currentCat = 5
+      this.activePhtGrp = 0      
+      this.setInit(this.currentCat);
 
   },
 
@@ -220,11 +304,20 @@ export default {
       if( p>0 ) this.activePhtGrp += 1;
       else this.activePhtGrp -= 1;
 
-      if( this.activePhtGrp < 0 ) this.activePhtGrp = this.phtgrps.length-1;
-      if( this.activePhtGrp > this.phtgrps.length-1 ) this.activePhtGrp = 0;
-      this.getCurLbls()
+      if( this.activePhtGrp < 0 ) this.activePhtGrp = this.phtall.length-1;
+      if( this.activePhtGrp > this.phtall.length-1 ) this.activePhtGrp = 0;
+
+      if(this.currentCat !== this.phtall[this.activePhtGrp].cat_id){
+        this.currentCat = this.phtall[this.activePhtGrp].cat_id
+        this.setInit( this.currentCat );
+      }else{
+        this.getCurLbls()
+      } 
+      
+      this.slideMoved = true
       // 显示CM
       this.isInit=false;
+      this.slideModel = this.activePhtGrp
 
     },
     getCurLbls(){
@@ -232,8 +325,7 @@ export default {
       this.curLbls = []
       for(var i in this.lbls){
         console.log("this.lbls[i].cat_id:" + this.lbls[i].cat_id)
-        console.log("this.phtgrps[this.activePhtGrp].cat_id:" + this.phtgrps[this.activePhtGrp].cat_id)
-        if( this.lbls[i].catimg_id == this.phtgrps[this.activePhtGrp].catimg_id){
+        if( this.lbls[i].catimg_id == this.phtall[this.activePhtGrp].catimg_id){
           console.log("getCurLbls add lbl")
           this.curLbls.push( this.lbls[i])
         }
@@ -269,7 +361,57 @@ export default {
         console.log("Homepage getGoodsRsp  error!" + response);
       })
       return rsps
-    },       
+    },
+    getLblImg(sales_type){
+      var nImg = "lbl/tag.gif"
+      for(var i in this.lbltypelist){
+        if( this.lbltypelist[i].sales_type == sales_type ){
+          nImg =  this.lbltypelist[i].lbl_path
+        }
+      }
+      return nImg
+    },
+    slideChange(value){
+      //alert("slideChange:"+value)
+      this.slideImgShow = 'none'
+      this.activePhtGrp = this.slideModel
+      //currentCat取得
+      if( this.currentCat !== this.phtall[this.activePhtGrp].cat_id){
+        this.currentCat = this.phtall[this.activePhtGrp].cat_id
+        this.setInit(this.currentCat)
+      }else{
+        this.getCurLbls()
+      }
+      
+      // 显示CM
+      this.isInit=false;
+      
+    },
+    formatSlideTip(val) {
+        //return val / 100
+        var str = this.phtall[val].catimg_mini
+        console.log("this.phtall[val]", this.phtall[val])
+        //return document.createElement(str)
+        this.nowSlideImg = str
+        // slideImgLeft
+        this.slideImgLeft = this.imgwidth * val / this.slideAmount
+        if( this.slideImgLeft > this.imgwidth - 120) this.slideImgLeft = this.imgwidth - 120
+        if( val == 0 && !this.slideMoved ) this.slideImgShow = 'none'
+        else{
+          this.slideImgShow = 'block'
+          this.slideMoved = true
+        } 
+        return ''
+    },
+    bigImgClick(){
+      if( this.slideShow === 'block'){
+         this.lblShow = 'block'
+         this.slideShow = 'none'
+      }else{
+         this.lblShow = 'none'
+         this.slideShow = 'block'
+      }
+    },
     async setInit( cat_id ){
       console.log( "Homepage setInit cat_id:" + cat_id )
       console.log( "i am there")
@@ -277,13 +419,6 @@ export default {
         "mode":"select",
         "selectsql":"select catimg_id, catimg_path, catimg_mini,cat_id from ns_catimg where cat_id=" + cat_id
       }
-      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
-        console.log(response.data)
-        this.phtgrps = response.data.data
-      }).catch((response)=>{
-        console.log("Homepage setInit get ns_catimg error!" + response);
-      })
-      this.activePhtGrp=0;
 
       // labelを取得する
       console.log("i am here")
@@ -351,7 +486,6 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .goodslbl{
-    background-image: url('../../assets/tag.gif');
     background-repeat: no-repeat;
     background-size: 100% 100%;
     position:absolute;
@@ -359,6 +493,28 @@ export default {
     height:80px;
     opacity:0.9;
     display:table-cell;
+}
+.slidediv{
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position:absolute;
+    width:100%;
+    height:20px;
+    opacity:0.9;
+    display:table-cell;
+    top: 5px;
+    left: 10px;
+}
+.slideImg{
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position:absolute;
+    width:100px;
+    height:100px;
+    opacity:0.9;
+    display:table-cell;
+    top: 30px;
+    left: 30px;
 }
 .lblfont{
   font-size: 16px;
