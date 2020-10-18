@@ -394,6 +394,7 @@ export default {
         //return document.createElement(str)
         this.nowSlideImg = str
         // slideImgLeft
+        this.imgwidth=imgbox.clientWidth;
         this.slideImgLeft = this.imgwidth * val / this.slideAmount
         if( this.slideImgLeft > this.imgwidth - 120) this.slideImgLeft = this.imgwidth - 120
         if( val == 0 && !this.slideMoved ) this.slideImgShow = 'none'
