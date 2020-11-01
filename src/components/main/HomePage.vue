@@ -228,7 +228,7 @@ export default {
         "mode":"select",
         "selectsql":sql
       }
-      this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log("lbltypelist get data:" , response.data)
         this.lbltypelist = response.data.data
       }).catch((response)=>{
@@ -242,7 +242,7 @@ export default {
         "mode":"select",
         "selectsql":sql
       }
-      this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log("すべて画像取得 get data:" , response.data)
         this.phtall = response.data.data
         this.slideAmount = this.phtall.length-1
@@ -354,7 +354,7 @@ export default {
         "mode":"select",
         "selectsql":sql
       }
-      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log(response.data)
         rsps = response.data.data
       }).catch((response)=>{
@@ -434,7 +434,7 @@ export default {
         'mode': 'select',
         'selectsql': sql
       }
-      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log(response.data)
         this.lbls = response.data.data
       }).catch((response)=>{
@@ -453,7 +453,7 @@ export default {
         "mode":"select",
         "selectsql":sql
       }
-      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log(response.data)
         this.itemall = response.data.data
       }).catch((response)=>{
@@ -469,7 +469,7 @@ export default {
         "mode":"select",
         "selectsql":sql
       }
-      await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+      await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log(response.data)
         this.cmall = response.data.data
       }).catch((response)=>{
