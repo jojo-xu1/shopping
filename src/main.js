@@ -9,7 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 
 Vue.use(ElementUI);
 Vue.config.productionTip = false
-
+Vue.prototype.$baseUrl = process.env.NODE_ENV === 'production' ? 'http://13.112.112.160:9080/test' : 'http://13.112.112.160:8080/test'
 
 /* eslint-disable no-new */
 new Vue({

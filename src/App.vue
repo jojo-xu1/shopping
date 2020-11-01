@@ -79,7 +79,7 @@ export default {
           "mode":"select",
           "selectsql":"select cat_id, cat_name, parent_id from ns_cat where delflg is null or delflg <> '1'"
         }
-        await this.axios.post('http://13.112.112.160:8080/test/web.do',req).then((response)=>{
+        await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
           console.log(response.data)
           this.listall = response.data.data
         }).catch((response)=>{
