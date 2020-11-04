@@ -3,7 +3,7 @@
 
     <el-row style=" height: 100%;margin-top:0px;margin-left:0px;">
   <el-col :span="18" style=" height: 100%;margin-top:0px;margin-left:0px;">
-      <div @click="bigImgClick" id="imgbox" class="imgbox" :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + phtall[activePhtGrp].catimg_path + ')'}">
+      <div @click="bigImgClick" id="imgbox" class="imgbox" :style="{'background-image': 'url(' + $webUrl + '/shopping/upimg/' + phtall[activePhtGrp].catimg_path + ')'}">
 
             <table height=100% width=100%>
               <tr >
@@ -19,7 +19,7 @@
                 <div :style="{height:'380px',display:slideShow}"  @mouseover="showIndex = 2" @mouseout="showIndex = 0" @click="movePhotoGrp( 1 )" :class="{'div-b':showIndex == 2}">
                   <span class="span-b">&gt;&gt;</span>
                </div>
-              </td>                            
+              </td>
             </tr>
             </table>
 
@@ -40,7 +40,7 @@
           </el-slider>
         </div>
 
-        <div class='slideImg' :style="{'background-image': 'url(' + 'http://13.112.112.160/shopping/upimg/' + nowSlideImg + ')', top: '38px', left: slideImgLeft + 'px', display:slideImgShow}">
+        <div class='slideImg' :style="{'background-image': 'url(' + $webUrl + '/shopping/upimg/' + nowSlideImg + ')', top: '38px', left: slideImgLeft + 'px', display:slideImgShow}">
 
         </div>
 
@@ -62,13 +62,13 @@
               </tr>
               <tr>
               <td width=50%>
-                <img :src="'http://13.112.112.160/shopping/upimg/' +item.itemimg" height="100px" width="100px"/>
+                <img :src="$webUrl + '/shopping/upimg/' +item.itemimg" height="100px" width="100px"/>
               </td>
               <td width=50% align=right class="goodsfont">
                   本体価格<br /> {{item.price}} 円 <br />
                   税込価格<br /> {{item.taxprice}} 円 <br />
                   <el-button type="success" plain >購入</el-button>
-              </td>            
+              </td>
             </tr>
             </table>
             </center>
@@ -81,9 +81,9 @@
                 <br>
                 <a class="rsblnk" @click="dispPop(lnk)">{{lnk.rsp_name}}</a><br/>
                 <span class="itemdesp" v-if="lnk.text">{{lnk.rep_desp}}</span><br/>
-                <img :src="'http://13.112.112.160/shopping/upimg/' + lnk.rsp_img" height="100px" width="100px"/>
+                <img :src=" $webUrl + '/shopping/upimg/' + lnk.rsp_img" height="100px" width="100px"/>
                 <br>
-                
+
                 <p>
                 </p>
               </div>
@@ -94,7 +94,7 @@
       <div v-else class="infoMian scoll-1">
           <div >
              <div  v-for="(cm, key) in cmall"  v-bind:key="key" >
-              <img class="cmimg" :src="'http://13.112.112.160/shopping/upimg/' + cm.cm_img" :alt="cm.cm_title">
+              <img class="cmimg" :src="$webUrl + '/shopping/upimg/' + cm.cm_img" :alt="cm.cm_title">
             </div>
 
           </div>
@@ -113,7 +113,7 @@
 
   <!-- レシビPOP -->
   <infoPop :show="show" :title="title" :rspid="rspid" @hidePop="hidePop" @submitPop="submitPop">
-  
+
   </infoPop>
 
   </div>
@@ -169,7 +169,7 @@ export default {
   },
   components: {
         infoPop
-  },  
+  },
   beforeRouteUpdate(to,from,next){
     console.log("router changed:" + to.params.cat_id );
     if(this.currentCat !== to.params.cat_id){
@@ -187,13 +187,13 @@ export default {
       }
     }
     console.log("beforeRouteUpdate this.activePhtGrp:" + this.activePhtGrp );
-    console.log("beforeRouteUpdate this.currentCat:" + this.currentCat );    
-    
+    console.log("beforeRouteUpdate this.currentCat:" + this.currentCat );
+
 
     next();
     //this.slideModel = this.activePhtGrp
-  },  
- 
+  },
+
   created:function () {
     if(this.$route.query) {
       console.log("I am not here")
@@ -252,7 +252,7 @@ export default {
 
       //
       this.currentCat = 5
-      this.activePhtGrp = 0      
+      this.activePhtGrp = 0
       this.setInit(this.currentCat);
 
   },
@@ -312,8 +312,8 @@ export default {
         this.setInit( this.currentCat );
       }else{
         this.getCurLbls()
-      } 
-      
+      }
+
       this.slideMoved = true
       // 显示CM
       this.isInit=false;
@@ -329,7 +329,7 @@ export default {
           console.log("getCurLbls add lbl")
           this.curLbls.push( this.lbls[i])
         }
-          
+
       }
     },
     getGoodsItems( gid ){
@@ -342,7 +342,7 @@ export default {
         }
       }
       return itms
-    },   
+    },
     async getGoodsRsp( gid ){
       console.log("getGoodsRsp start")
       var rsps = []
@@ -382,10 +382,10 @@ export default {
       }else{
         this.getCurLbls()
       }
-      
+
       // 显示CM
       this.isInit=false;
-      
+
     },
     formatSlideTip(val) {
         //return val / 100
@@ -401,7 +401,7 @@ export default {
         else{
           this.slideImgShow = 'block'
           this.slideMoved = true
-        } 
+        }
         return ''
     },
     bigImgClick(){
@@ -575,15 +575,15 @@ export default {
   color: rgb(151, 54, 130);
   font-size: 12px;
 }
-.div-b{ 
+.div-b{
   height: 380px;
   text-align: center;
   line-height: 380px;
   background:rgb(0, 255, 157);padding:5px;color:#FFF;
   filter:alpha(Opacity=60);-moz-opacity:0.6;opacity: 0.6
-} 
-.span-b{ 
+}
+.span-b{
   background:rgb(0, 255, 157);padding:5px;color:#000;
   filter:alpha(Opacity=30);-moz-opacity:0.3;opacity: 0.3
-} 
+}
 </style>
