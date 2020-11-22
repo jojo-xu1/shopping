@@ -165,6 +165,7 @@ export default {
       lblShow:'block',
       currentCat:5,
       phtall:[{catimg_id:0, catimg_path:'', catimg_mini:'',cat_id:0}],
+      rsps:[],
     }
   },
   components: {
@@ -263,6 +264,7 @@ export default {
       this.gdsDetail.items = this.getGoodsItems( lbl.goods_id )
       this.gdsDetail.links = await this.getGoodsRsp( lbl.goods_id )
       console.log( "openLbl links.length: " +  this.gdsDetail.links.length )
+      console.log(this.gdsDetail.links)
       this.isInit=true;
     },
     showLbl(lbl,event){
@@ -285,8 +287,8 @@ export default {
     },
     // レシピ紹介POPの表示
     dispPop(lnk){
-      this.rspid = lnk.rid;
-      this.title = lnk.title;
+      this.rspid = lnk.rsp_id;
+      this.title = lnk.rsp_name;
       this.show = true;
     },
 
@@ -345,7 +347,7 @@ export default {
     },
     async getGoodsRsp( gid ){
       console.log("getGoodsRsp start")
-      var rsps = []
+      // var rsps = []
       var sql = "select distinct a.rsp_id, a.rsp_name, a.rep_desp ,a.rsp_img, a.rsp_metial"
       sql += " from ns_rsp a"
       sql += " left join ns_rspgoods g on g.rsp_id = a.rsp_id and g.goods_id = " + gid
@@ -356,11 +358,11 @@ export default {
       }
       await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
         console.log(response.data)
-        rsps = response.data.data
+        this.rsps = response.data.data
       }).catch((response)=>{
         console.log("Homepage getGoodsRsp  error!" + response);
       })
-      return rsps
+      return this.rsps 
     },
     getLblImg(sales_type){
       var nImg = "lbl/tag.gif"
