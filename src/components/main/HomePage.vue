@@ -210,6 +210,7 @@ export default {
 
 　},
   mounted:function(){
+    console.log("I am in mounted");
     var imgbox=document.getElementById("imgbox");
     console.log("imgbox.clientHeight:" + imgbox.clientHeight)
     this.imgheight=imgbox.clientHeight;
