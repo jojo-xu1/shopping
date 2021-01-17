@@ -21,33 +21,24 @@
         </div>
 
       </div>
-      <el-submenu index="1">
-        <template slot="title">
-          <span style="font-weight: bold;">調味料、ビン類</span>
-        </template>
-        <el-menu-item-group>
-          <el-menu-item index="/main/12">醤油類</el-menu-item>
-          <el-menu-item index="/main/13">油</el-menu-item>
-        </el-menu-item-group>
-      </el-submenu>
-      <el-submenu index="2">
-        <template slot="title">
-          <span style="font-weight: bold;">野菜・くだもの</span>
-        </template>
-        <el-menu-item-group>
-          <el-menu-item index="/main/1">根菜、芋類</el-menu-item>
-          <el-menu-item index="/main/2">葉物</el-menu-item>
-          <el-menu-item index="/main/3">サラダ菜</el-menu-item>
-          <el-menu-item index="/main/4">香味野菜、きのこ</el-menu-item>
-          <el-menu-item index="/main/5">カット野菜</el-menu-item>
-        </el-menu-item-group>
 
-      </el-submenu>
+      <el-tree
+        :props="defaultProps"
+        :load="loadNode"
+        lazy
+        @node-click="handleNodeClick"
+      />
 
     </el-menu>
     </el-aside>
     <el-main style="background-color: blanchedalmond;margin-top:0px;margin-left:0px;padding:0;overflow:hidden;">
-      <router-view />
+      <keep-alive v-if="$route.meta.keepAlive">
+        <router-view/>
+      </keep-alive>
+        <!--<FooterGuide  />-->
+      <router-view v-if="!$route.meta.keepAlive">
+        <!-- 这里是不被缓存的视图组件，比如 page3 -->
+      </router-view>
 
     </el-main>
 
@@ -67,12 +58,65 @@ export default {
     return {
       input: '',
       gotop: false,
+      defaultProps: {
+        label: 'cat_name',
+        isLeaf: 'leaf'
+      },
+      listall: [
+        { cat_id: 1, cat_name: 'xxx', parent_id: 0 }
+      ],
+
     }
   },
    mounted() {
      window.addEventListener("scroll", this.handleScroll, true);
    },
    methods: {
+    async loadNode(node, resolve) {
+      console.log('loadNode start')
+      if (node.level === 0) {
+        var req = {
+          "mode":"select",
+          "selectsql":"select cat_id, cat_name, parent_id from ns_cat where delflg is null or delflg <> '1'"
+        }
+        await this.axios.post(this.$baseUrl + '/web.do',req).then((response)=>{
+          console.log(response.data)
+          this.listall = response.data.data
+        }).catch((response)=>{
+          console.log(response);
+        })
+        return resolve(this.getnode(0))
+      }
+          this.$router.push({
+              path:"/main/" + node.cat_id,//这个path就是你在router/index.js里边配置的路径
+              query:{
+                    cat_id:node.cat_id
+              }
+          })
+          console.log("node is selected")
+      return resolve(this.getnode(node.data.cat_id))
+    },
+    getnode(parentid) {
+      console.log("enter getnode"+parentid)
+      var nlist = []
+      for (var prop in this.listall) {
+        if (parentid === this.listall[prop].parent_id) { nlist.push(this.listall[prop]) }
+      }
+      return nlist
+    },
+    handleNodeClick(node,data,value) {
+      //if(node.parent_id !== 0 ){
+          //console.log("node.cat_id111:" + node.cat_id)
+          //this.$router.push({name:'main',params:{cat_id:node.cat_id}})
+          this.$router.push({
+              path:"/main/" + node.cat_id,//这个path就是你在router/index.js里边配置的路径
+              query:{
+                    cat_id:node.cat_id
+              }
+          })
+          console.log("node is selected")
+      //}
+    },
      handleScroll() {
       //注意不同浏览器之间的兼容性
       let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;

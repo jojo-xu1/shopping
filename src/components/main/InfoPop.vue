@@ -12,9 +12,9 @@
 
                   <div class="imgInfo">
 
-                    <img :src="rspData.img" width="250px" height="250px" alt="">
+                    <img :src="rspjson.rsp_img" width="250px" height="250px" alt="">
                     <div>
-                      {{rspData.text}}
+                      {{ rspjson.rep_desp }}
                     </div>
                   </div>
                   <div class="msgInfo" >
@@ -22,17 +22,17 @@
                         <table width=100%>
                           <tr>
                             <td colspan=3>
-                              <span class="rsp-desp">{{rspData.psncnt}}</span>
+                              <span class="rsp-desp">{{ rspjson.rsp_metial }}{{ rspData }}</span>
                             </td>
                             <td colspan=4>
                               <span>お薦め商品</span>
                             </td>
                           </tr>
-                          <tr v-for="(item,key) in rspData.items" :key="key">
+                          <tr v-for="item in itemList" :key="item.goods_id">
                             <td  >
-                                &nbsp;&nbsp;{{item.goodsname}}
+                                &nbsp;&nbsp;{{item.goods_name}}
                             </td>
-                            <td align=right>{{item.need}}</td>
+                            <td align=right>{{item.rgds_amount}}</td>
                             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
                             <td><el-checkbox change='update'></el-checkbox>
                               <a class="itemdesp" @click="dispPop(key)">{{item.gdsitemname}}</a>
@@ -103,99 +103,101 @@ export default {
             items: {},
             oldrspid:'',
             gdsitmshow:false,
+            itemList: [],
+            rspjson: {},
         }
     },
     mounted() {
         this.node = document.querySelector('.modal-container');
-        this.rspname = "";
-        this.rsptext = "";
-        this.items = {'黄ピーマン':'300g','ピーマン':'100g','豚こま肉':'380g','★酢':'大さじ３'};
+        this.init()
     },
     computed: {
       // 计算属性的 getter
       rspData: function () {
-        var rsp = {};
-
-          rsp.img = "http://netengine.co.jp/static/upimg/rsp/rspkyuri01.jpg";
-          rsp.psncnt = "材料（2人分）";
-          rsp.text = "きゅうりを炒めておつまみやお弁当にぴったりのおかずにしました。簡単なので1品追加したい時にもおすすめです。";
-          rsp.items = [
-              {
-              'goodsname':'きゅうり',
-              'need':'300g',
-              'gdsitemid':'yu231',
-              'gdsitemname':'茨城産きゅうり',
-              'price':'68',
-              'unit':'本',
-              },
-              {
-              'goodsname':'ちくわ',
-              'need':'1本',
-              'gdsitemid':'yu231',
-              'gdsitemname':'あかさ　竹輪',
-              'price':'150',
-              'unit':'袋',
-              },
-              {
-              'goodsname':'ごま油',
-              'need':'小さじ2',
-              'gdsitemid':'yu231',
-              'gdsitemname':'はまや　ごま油',
-              'price':'350',
-              'unit':'本',
-              },
-              {
-              'goodsname':'砂糖',
-              'need':'小さじ1',
-              'gdsitemid':'yu231',
-              'gdsitemname':'いきし　砂糖',
-              'price':'200',
-              'unit':'袋',
-              },
-              {
-              'goodsname':'醤油',
-              'need':'小さじ1',
-              'gdsitemid':'yu231',
-              'gdsitemname':'にひみ　醬油',
-              'price':'380',
-              'unit':'本',
-              },
-              {
-              'goodsname':'ラー油',
-              'need':'少量',
-              'gdsitemid':'yu231',
-              'gdsitemname':'うくす　ラー油',
-              'price':'300',
-              'unit':'本',
-              },
-            ];
-
-        // `this` 指向 vm 实例
-        return rsp;
+        this.init()
+        return ''
       }
    },
     methods: {
+       init: async function() {
+      var rsp = {}
+      var req1 = {
+        mode: 'select',
+        selectsql:
+            "select rsp_id, rsp_name, rep_desp, rsp_img, rsp_metial from ns_rsp where (delflg is null or delflg <> '1') and rsp_id=" + this.rspid
+      }
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req1)
+        .then(response => {
+          console.log('Before RspPop show')
+          console.log(response.data)
+          rsp = response.data.data[0]
+        })
+        .catch(response => {
+          console.log('Before Update select   error!' + response)
+        })
+      this.title = rsp.rsp_name
+      rsp.rsp_img = this.$webUrl + '/shopping/upimg/' + rsp.rsp_img
+
+      // 材料明細取得
+     var req2 = {
+        mode: 'select',
+        selectsql:
+            "select a.rgds_id, a.goods_id, a.rsp_id, a.rgds_amount, g.goods_name from ns_rspgoods a left join ns_goods g on g.goods_id = a.goods_id where (a.delflg is null or a.delflg <> '1') and a.rsp_id=" + this.rspid
+      }
+      var that = this
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req2)
+        .then(response => {
+          console.log('rspGoods List')
+          console.log(response.data)
+          that.itemList = response.data.data
+        })
+        .catch(response => {
+          console.log('Before Update select   error!' + response)
+        })
+        //
+        for (var item in that.itemList) {
+          var goods_id =that.itemList[item].goods_id
+                   var req3 = {
+                      mode: 'select',
+                      selectsql:
+                          "select item_name,price,unit from ns_item where goods_id = " +goods_id 
+                    }
+              await this.axios
+                      .post(this.$baseUrl + '/web.do', req3)
+                      .then(response => {
+                        console.log(response.data)
+                        that.itemList[item].gdsitemname = response.data.data[0].item_name
+                        that.itemList[item].price = response.data.data[0].price
+                        that.itemList[item].unit = response.data.data[0].unit
+                      })
+                      .catch(response => {
+                        console.log('Before Update select   error!' + response)
+                      })
+        }
+
+      // `this` 指向 vm 实例
+      this.rspjson = rsp
+      return this.rspjson
+    },
         hidePop() {
             this.$emit('hidePop')
         },
-
         submitPop() {
             this.$emit('submitPop')
         },
-
         setStartingPoint(e) {
             this.x = e.clientX - this.node.offsetLeft
             this.y = e.clientY - this.node.offsetTop
             this.isCanMove = true
         },
-
         modalMove(e) {
             if (this.isCanMove) {
                 this.node.style.left = e.clientX - this.x + 'px'
 			    this.node.style.top = e.clientY - this.y + 'px'
             }
         },
-
         cancelMove() {
             this.isCanMove = false
         },
@@ -207,13 +209,11 @@ export default {
             // 取消弹窗回调
             this.gdsitmshow = false
         },
-
         submitSubPop() {
             // 确认弹窗回调
             this.gdsitmshow = false
         },
         submit(){
-
         }
     }
 }
@@ -265,7 +265,6 @@ export default {
 .modal-main {
     padding: 15px 40px;
 }
-
 .content{
   display: flex;
   justify-content: center;
