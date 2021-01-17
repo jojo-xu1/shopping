@@ -45,8 +45,10 @@
   </el-container>
   <Footer/>
   <div class="gotop" v-show="gotop" @click="toTop">Top</div>
+  <div class="goCart" v-show="searchBarFixed" @click="handleSelect">
+    <li>カードへ<i class="iconfont icon-jiantouxia"></i></li>
   </div>
-
+  </div>
 </template>
 
 <script>
@@ -65,7 +67,7 @@ export default {
       listall: [
         { cat_id: 1, cat_name: 'xxx', parent_id: 0 }
       ],
-
+      searchBarFixed:true
     }
   },
    mounted() {
@@ -117,11 +119,11 @@ export default {
           console.log("node is selected")
       //}
     },
-     handleScroll() {
+    handleScroll() {
       //注意不同浏览器之间的兼容性
       let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;
       scrolltop > 30 ? (this.gotop = true) : (this.gotop = false);
-      },
+    },
       toTop() {
       let top = document.documentElement.scrollTop || document.body.scrollTop;
       // 实现滚动效果
@@ -185,6 +187,17 @@ width: 100%;
   cursor: pointer;
   padding: 10px;
   background: white;
+  color: #000000;
+  border: 1px solid #000000;
+}
+.goCart{
+  text-align: center;
+  position: fixed;
+  right: 30px;
+  top: 10px;
+  cursor: pointer;
+  padding: 10px;
+  background: #67C23A;
   color: #000000;
   border: 1px solid #000000;
 }

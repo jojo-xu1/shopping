@@ -98,11 +98,13 @@
         </el-table-column>
       </el-table>
       <span style="text-align: right;float:right;margin-top: 20px;">税率8.0%は軽減税率対象商品です</span>
-      <el-button type="success" style="margin-top: 20px;">注文へ</el-button>
+      <el-button type="success" style="margin-top: 20px;" @click="orderSubmit">注文へ</el-button>
   </div>
+<loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
 
+  </loginIndex>
   </div>
-
+ 
 </template>
 
 <script>
@@ -110,6 +112,7 @@ import lj from '@/assets/lj.jpg'
 import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
+import loginIndex from '@/components/login/login.vue'
 export default {
   name: 'Footer',
   data () {
@@ -119,8 +122,12 @@ export default {
                  {'src':tmt,'prodName':'トップバリグリーンアイ有機野菜 北海道などの国内産 350g 1袋','price':398,'num':1,'sui':0.08},
                  {'src':rg,'prodName':'茨城県などの国内産 レンコン 200g 1袋','price':496,'num':1,'sui':0.08},
                  {'src':dk,'prodName':'青森・千葉県などの国内産 だいこん 1/2カット （葉の部分）','price':99,'num':1,'sui':0.08},
-                ]
+                ],
+      visibleComponent: false,
     }
+  },
+    components: {
+        loginIndex
   },
   methods: {
       handleSelect(key, keyPath) {
@@ -139,7 +146,26 @@ export default {
       },
       deleteRow(index, rows) {
         rows.splice(index, 1);
-      }
+      },
+      orderSubmit(){
+        var token = localStorage.getItem('tttocken');
+        localStorage.removeItem('tttocken');
+        if(!token){
+          this.visibleComponent = true
+          console.log( 'ordersubmit'+this.visibleComponent)
+        }
+      },
+      onSubmit(){
+        console.log('loginSubmit')
+      },
+         hidePop() {
+        // 取消弹窗回调
+        this.visibleComponent = false
+      },
+      submitPop() {
+          // 确认弹窗回调
+          this.visibleComponent = false
+      },
   }
 }
 </script>
