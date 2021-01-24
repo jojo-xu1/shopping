@@ -486,6 +486,7 @@ export default {
     },
     async addToCart(addItem){
       this.cartList = []
+
       //await this.axios.get(this.$baseUrl + '/cat-info').then((response)=>{
         console.log('get cat info')
         //console.log(response.data)
@@ -504,6 +505,7 @@ export default {
           }
         }
         if(hasRecord === false){
+
           let str = Number((addItem.taxprice/addItem.price)-1)
           var sui = str.toFixed(2)
           var cartRecord = {'src':addItem.itemimg,'itemId':addItem.item_id,'prodName':addItem.item_name,'price':addItem.price,'num':1,'sui':sui}
@@ -511,18 +513,22 @@ export default {
           console.log(cartRecord)
           this.cartList.push(cartRecord)
         }
+
         console.log("latest cartList")
         console.log(this.cartList)
         localStorage.setItem('cartList',JSON.stringify(this.cartList));
         //console.log(JSON.stringify(this.cartList))
         this.axios.post(this.$baseUrl + '/cat-modify',JSON.stringify(this.cartList)).then((response)=>{
+
           console.log(response.data)
         }).catch((response)=>{
           console.log("cat-modify error!" + response);
         })
+
       //}).catch((response)=>{
       //  console.log("cat-info error!" + response);
       //})
+
     }
   }
 }
