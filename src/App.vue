@@ -45,8 +45,10 @@
   </el-container>
   <Footer/>
   <div class="gotop" v-show="gotop" @click="toTop">Top</div>
+  <div class="goCart" v-show="searchBarFixed" @click="handleSelect">
+    <li>カードへ<i class="iconfont icon-jiantouxia"></i></li>
   </div>
-
+  </div>
 </template>
 
 <script>
@@ -65,7 +67,7 @@ export default {
       listall: [
         { cat_id: 1, cat_name: 'xxx', parent_id: 0 }
       ],
-
+      searchBarFixed:true
     }
   },
    mounted() {
@@ -87,6 +89,13 @@ export default {
         })
         return resolve(this.getnode(0))
       }
+          this.$router.push({
+              path:"/main/" + node.cat_id,//这个path就是你在router/index.js里边配置的路径
+              query:{
+                    cat_id:node.cat_id
+              }
+          })
+          console.log("node is selected")
       return resolve(this.getnode(node.data.cat_id))
     },
     getnode(parentid) {
@@ -98,7 +107,7 @@ export default {
       return nlist
     },
     handleNodeClick(node,data,value) {
-      if(node.parent_id !== 0 ){
+      //if(node.parent_id !== 0 ){
           //console.log("node.cat_id111:" + node.cat_id)
           //this.$router.push({name:'main',params:{cat_id:node.cat_id}})
           this.$router.push({
@@ -107,13 +116,14 @@ export default {
                     cat_id:node.cat_id
               }
           })
-      }
+          console.log("node is selected")
+      //}
     },
-     handleScroll() {
+    handleScroll() {
       //注意不同浏览器之间的兼容性
       let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;
       scrolltop > 30 ? (this.gotop = true) : (this.gotop = false);
-      },
+    },
       toTop() {
       let top = document.documentElement.scrollTop || document.body.scrollTop;
       // 实现滚动效果
@@ -177,6 +187,17 @@ width: 100%;
   cursor: pointer;
   padding: 10px;
   background: white;
+  color: #000000;
+  border: 1px solid #000000;
+}
+.goCart{
+  text-align: center;
+  position: fixed;
+  right: 30px;
+  top: 10px;
+  cursor: pointer;
+  padding: 10px;
+  background: #67C23A;
   color: #000000;
   border: 1px solid #000000;
 }

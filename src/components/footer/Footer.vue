@@ -98,6 +98,7 @@
         </el-table-column>
       </el-table>
       <span style="text-align: right;float:right;margin-top: 20px;">税率8.0%は軽減税率対象商品です</span>
+
       <el-button type="success" style="margin-top: 20px;" @click="dialogFormVisible = true">注文へ</el-button>
       <el-dialog title="ご注文手続き" :visible.sync="dialogFormVisible" width=80%>
         <el-form :model="form">
@@ -356,8 +357,9 @@
           </el-dialog>
        </div>
   </div>
-  </div>
 
+  </div>
+ 
 </template>
 
 <script>
@@ -365,6 +367,7 @@ import lj from '@/assets/lj.jpg'
 import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
+
 import Vue from 'vue'
     Vue.filter('dataFormat', function (value, fmt) {
     let getDate = new Date(value);
@@ -387,6 +390,7 @@ import Vue from 'vue'
     }
     return fmt;
     });
+
 export default {
   name: 'Footer',
   data () {
@@ -433,6 +437,7 @@ export default {
      this.init()
    },
    
+
   methods: {
       handleSelect(key, keyPath) {
          if(key == 1){
@@ -650,7 +655,26 @@ export default {
       },
   deleteRow(index, rows) {
         rows.splice(index, 1);
-      }
+      },
+      orderSubmit(){
+        var token = localStorage.getItem('tttocken');
+        localStorage.removeItem('tttocken');
+        if(!token){
+          this.visibleComponent = true
+          console.log( 'ordersubmit'+this.visibleComponent)
+        }
+      },
+      onSubmit(){
+        console.log('loginSubmit')
+      },
+         hidePop() {
+        // 取消弹窗回调
+        this.visibleComponent = false
+      },
+      submitPop() {
+          // 确认弹窗回调
+          this.visibleComponent = false
+      },
   }
 }
 </script>
