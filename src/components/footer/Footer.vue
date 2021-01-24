@@ -264,9 +264,9 @@
           label="お届け先"
           align="center"
         >
-        <template >
+        <template slot-scope="scope">
           <div style="text-align: right;margin-top:25px">
-            <span>東京都世田谷区砧1-10-11</span>
+            <span>{{scope.row.dlv_address}}</span>
           </div>
         </template>
         </el-table-column>
@@ -703,8 +703,9 @@ export default {
           var req = {
             mode: 'select',
             selectsql:
-              " select d.createtime, d.order_id, d.status, o.order_info_id from ns_dlv d "
-              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') "
+              " select d.createtime, d.order_id, d.status, o.order_info_id,o.dlv_address from ns_dlv d "
+              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') " 
+              + " order by o.createtime desc "
           }
         console.log("SLELCT TEST")
         console.log(req)
