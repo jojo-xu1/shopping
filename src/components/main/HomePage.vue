@@ -486,10 +486,16 @@ export default {
     },
     async addToCart(addItem){
       this.cartList = []
-      await this.axios.get(this.$baseUrl + '/cat-info').then((response)=>{
+
+      //await this.axios.get(this.$baseUrl + '/cat-info').then((response)=>{
         console.log('get cat info')
-        console.log(response.data)
-        this.cartList = response.data.tableData
+        //console.log(response.data)
+        //this.cartList = response.data.tableData
+        //localStorage.removeItem('tableData')
+        var records = localStorage.getItem('cartList')
+        console.log(records)
+        this.cartList = JSON.parse(records)
+        console.log(this.cartList)
         var hasRecord = false;
         for(var i in this.cartList){
           if( this.cartList[i].itemId == addItem.item_id ){
@@ -499,7 +505,7 @@ export default {
           }
         }
         if(hasRecord === false){
-          this.cartList = []
+
           let str = Number((addItem.taxprice/addItem.price)-1)
           var sui = str.toFixed(2)
           var cartRecord = {'src':addItem.itemimg,'itemId':addItem.item_id,'prodName':addItem.item_name,'price':addItem.price,'num':1,'sui':sui}
@@ -507,18 +513,22 @@ export default {
           console.log(cartRecord)
           this.cartList.push(cartRecord)
         }
-        var req = {
-        "tableData":this.cartList
-        }
+
+        console.log("latest cartList")
+        console.log(this.cartList)
+        localStorage.setItem('cartList',JSON.stringify(this.cartList));
         //console.log(JSON.stringify(this.cartList))
-        this.axios.post(this.$baseUrl + '/cat-modify',req).then((response)=>{
+        this.axios.post(this.$baseUrl + '/cat-modify',JSON.stringify(this.cartList)).then((response)=>{
+
           console.log(response.data)
         }).catch((response)=>{
           console.log("cat-modify error!" + response);
         })
-      }).catch((response)=>{
-        console.log("cat-info error!" + response);
-      })
+
+      //}).catch((response)=>{
+      //  console.log("cat-info error!" + response);
+      //})
+
     }
   }
 }
