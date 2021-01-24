@@ -221,7 +221,7 @@
       <div class="line"></div><span>配送状況</span>
     </div>
       <el-table
-        :data="orderHistoryData"
+        :data="dlvHistoryData"
         border
         :header-cell-style="{background:'#F2F6FC'}"
         style="width:80%;margin-left:100px">
@@ -244,7 +244,7 @@
          <template slot-scope="scope">
           <div class="prodName">
               <div style="margin-left: 0.5rem;text-align: left;margin-top:25px">
-                <span>{{scope.row.order_id}}</span>
+                <span>{{scope.row.order_info_id}}</span>
               </div>
           </div>
         </template>
@@ -264,9 +264,9 @@
           label="お届け先"
           align="center"
         >
-        <template >
+        <template slot-scope="scope">
           <div style="text-align: right;margin-top:25px">
-            <span>東京都世田谷区砧1-10-11</span>
+            <span>{{scope.row.dlv_address}}</span>
           </div>
         </template>
         </el-table-column>
@@ -330,7 +330,7 @@
           align="center"
         >
         <template slot-scope="scope" >
-          <div @click="delInfo(scope.row.order_id)" style="text-align: right;margin-top:25px"> 
+          <div @click="dlvInfo(scope.row.order_id)" style="text-align: right;margin-top:25px"> 
             <span>{{scope.row.status}}</span>
           </div>
         </template>
@@ -384,6 +384,7 @@ export default {
       orderHistoryData:[],
       userAddressList :[],
       orderDetailData:[],
+      dlvHistoryData:[],
       // tableData:[],
               tableData:[{'src':lj,'itemId':311,'prodName':'オランダなどの外国産 パプリカ（黄）1個','price':128,'num':2,'sui':0.08,'date':20201220,'state':'完了'},
                  {'src':tmt,'itemId':312,'prodName':'トップバリグリーンアイ有機野菜 北海道などの国内産 350g 1袋','price':398,'num':1,'sui':0.08,'date':20201220,'state':'配達中'},
@@ -431,6 +432,7 @@ export default {
           this.deliveryHistoryShow = false
           this.orderHistoryShow = false
            }else if(key == 2){
+          this.setAllOrdhis()
           this.shoppingcardShow =false
           this.deliveryHistoryShow = true
           this.orderHistoryShow = false
@@ -453,6 +455,7 @@ export default {
         }, 1);
       },
   init: async function() {
+    this.setAllOrdhis()
         //注文履歴初期化
       var req = {
             mode: 'select',
@@ -504,7 +507,7 @@ export default {
           console.log('Homepage getGoodsRsp  error!' + response)
         })
         //配送状況データ取得
-
+         
       },
     orderDetail: async function(id) {
         this.showDetail = true
@@ -544,7 +547,14 @@ export default {
 
       },
   onSubmit : async function() {
-
+       if (!this.form.address) {
+        alert('お届け先を入力して下さい。')
+        return
+      }
+       if (!this.form.pay) {
+        alert('お支払方法を入力して下さい。')
+        return
+      }
           //システム時間取得
           var  date1 =new Date();
           var dateTime = this.formatDate(Date.parse(date1))
@@ -626,12 +636,15 @@ export default {
           this.dialogFormVisible = false
         console.log('submit!')
         this.init()
+        this.form.pay = ''
+        this.form.address = ''
         //TODO
         //购物车刷新
 
       },
-      delInfo: function (id){
+      dlvInfo: function (id){
          this.handleSelect(2)
+        this.setDlvhis(id)
           console.log("-----------goto---配送状况")
           console.log(id)
       },
@@ -662,6 +675,8 @@ export default {
   bktSetOrd() {
          this.dialogFormVisible = true
          this.dialogFormVisible2 = false
+         this.form.pay=''
+         this.form.address=''
       },
   deleteRow(index, rows) {
         rows.splice(index, 1);
@@ -681,6 +696,84 @@ export default {
       submitPop() {
           // 确认弹窗回调
           this.visibleComponent = false
+      },
+      
+      // 加载所有订单配送状况
+      async setAllOrdhis(){
+          var req = {
+            mode: 'select',
+            selectsql:
+              " select d.createtime, d.order_id, d.status, o.order_info_id,o.dlv_address from ns_dlv d "
+              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') " 
+              + " order by o.createtime desc "
+          }
+        console.log("SLELCT TEST")
+        console.log(req)
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req)
+        .then(response => {
+          console.log(response.data)
+          this.dlvHistoryData = response.data.data
+        })
+        .catch(response => {
+          console.log('Homepage getGoodsRsp  error!' + response)
+        })
+        console.log(req)
+        for (var item in this.dlvHistoryData) {
+          switch(this.dlvHistoryData[item].status){
+            case '0':
+              this.dlvHistoryData[item].status = "未出荷"
+              break;
+            case '1':
+              this.dlvHistoryData[item].status = "出荷済み"
+              break;
+            case '2':
+              this.dlvHistoryData[item].status = "配達済み"
+              break;
+            case '3':
+              this.dlvHistoryData[item].status = "キャンセル"
+              break;
+          }
+        }
+      },
+      // 配送状況検索
+      async setDlvhis(order_id){
+      var req = {
+            mode: 'select',
+            selectsql:
+              " select d.createtime, d.order_id, d.status, o.order_info_id from ns_dlv d "
+              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') "
+              + " and d.order_id = " + order_id 
+              + " order by d.createtime desc "
+          }
+        console.log("--------------0000000000000000000-------------")
+        console.log(req)
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req)
+        .then(response => {
+          console.log(response.data)
+          this.dlvHistoryData = response.data.data
+        })
+        .catch(response => {
+          console.log('Homepage getGoodsRsp  error!' + response)
+        })
+        console.log(req)
+        for (var item in this.dlvHistoryData) {
+          switch(this.dlvHistoryData[item].status){
+            case '0':
+              this.dlvHistoryData[item].status = "未出荷"
+              break;
+            case '1':
+              this.dlvHistoryData[item].status = "出荷済み"
+              break;
+            case '2':
+              this.dlvHistoryData[item].status = "配達済み"
+              break;
+            case '3':
+              this.dlvHistoryData[item].status = "キャンセル"
+              break;
+          }
+        }
       },
   }
 }
