@@ -455,7 +455,8 @@ export default {
         }, 1);
       },
   init: async function() {
-    this.setAllOrdhis()
+        //配送状況データ取得
+      this.setAllOrdhis()
         //注文履歴初期化
       var req = {
             mode: 'select',
@@ -465,7 +466,6 @@ export default {
               +"and dv.last_flg = '1' and rd.user_id ="+this.userId
               +" order by rd.createtime DESC"
           }
-        console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
         .then(response => {
@@ -506,7 +506,6 @@ export default {
         .catch(response => {
           console.log('Homepage getGoodsRsp  error!' + response)
         })
-        //配送状況データ取得
          
       },
     orderDetail: async function(id) {
@@ -518,8 +517,6 @@ export default {
           "select dtl.item_name, dtl.item_price, dtl.item_num,itm.item_desp from ns_order_detail dtl "
           +"left join ns_item itm on dtl.item_id = itm.item_id where  order_id =" + id
      }
-
-     console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
         .then(response => {
@@ -558,8 +555,7 @@ export default {
           //システム時間取得
           var  date1 =new Date();
           var dateTime = this.formatDate(Date.parse(date1))
-          var orderInfoId = Math.round(Math.random()*10000000000) 
-          console.log(orderInfoId)
+          var orderInfoId = Math.round(Math.random()*10000000000)
           //注文履歴登録
           var req1 = {
           mode: 'insert',
@@ -642,11 +638,11 @@ export default {
         //购物车刷新
 
       },
+      //配送状况へ
       dlvInfo: function (id){
          this.handleSelect(2)
+         this.activeIndex = 2
         this.setDlvhis(id)
-          console.log("-----------goto---配送状况")
-          console.log(id)
       },
       formatDate: function (value) {
         let date = new Date(value);
@@ -708,7 +704,6 @@ export default {
               + " order by o.createtime desc "
           }
         console.log("SLELCT TEST")
-        console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
         .then(response => {
@@ -746,8 +741,6 @@ export default {
               + " and d.order_id = " + order_id 
               + " order by d.createtime desc "
           }
-        console.log("--------------0000000000000000000-------------")
-        console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
         .then(response => {
