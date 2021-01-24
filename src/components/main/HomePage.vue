@@ -67,7 +67,7 @@
               <td width=50% align=right class="goodsfont">
                   本体価格<br /> {{item.price}} 円 <br />
                   税込価格<br /> {{item.taxprice}} 円 <br />
-                  <el-button type="success" plain >購入</el-button>
+                  <el-button type="success" plain @click="addToCart(item)">購入</el-button>
               </td>
             </tr>
             </table>
@@ -166,6 +166,7 @@ export default {
       currentCat:5,
       phtall:[{catimg_id:0, catimg_path:'', catimg_mini:'',cat_id:0}],
       rsps:[],
+      cartList:[],
     }
   },
   components: {
@@ -262,6 +263,8 @@ export default {
     async openLbl(lbl){
       this.gdsDetail = lbl;
       this.gdsDetail.items = this.getGoodsItems( lbl.goods_id )
+      console.log("show details info")
+      console.log(this.gdsDetail.items)
       this.gdsDetail.links = await this.getGoodsRsp( lbl.goods_id )
       console.log( "openLbl links.length: " +  this.gdsDetail.links.length )
       console.log(this.gdsDetail.links)
@@ -480,8 +483,43 @@ export default {
 
       // 显示CM
       this.isInit=false;
+    },
+    async addToCart(addItem){
+      this.cartList = []
+      await this.axios.get(this.$baseUrl + '/cat-info').then((response)=>{
+        console.log('get cat info')
+        console.log(response.data)
+        this.cartList = response.data.tableData
+        var hasRecord = false;
+        for(var i in this.cartList){
+          if( this.cartList[i].itemId == addItem.item_id ){
+            this.cartList[i].num += 1
+            hasRecord = true
+            break
+          }
+        }
+        if(hasRecord === false){
+          this.cartList = []
+          let str = Number((addItem.taxprice/addItem.price)-1)
+          var sui = str.toFixed(2)
+          var cartRecord = {'src':addItem.itemimg,'itemId':addItem.item_id,'prodName':addItem.item_name,'price':addItem.price,'num':1,'sui':sui}
+          console.log("new record")
+          console.log(cartRecord)
+          this.cartList.push(cartRecord)
+        }
+        var req = {
+        "tableData":this.cartList
+        }
+        //console.log(JSON.stringify(this.cartList))
+        this.axios.post(this.$baseUrl + '/cat-modify',req).then((response)=>{
+          console.log(response.data)
+        }).catch((response)=>{
+          console.log("cat-modify error!" + response);
+        })
+      }).catch((response)=>{
+        console.log("cat-info error!" + response);
+      })
     }
-
   }
 }
 </script>
