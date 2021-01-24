@@ -7,6 +7,7 @@
     <el-menu-item index="4">個人設定</el-menu-item>
     <el-menu-item index="5">問い合わせ</el-menu-item>
   </el-menu>
+  <!-- カード -->
   <div class="submain" v-show="shoppingcardShow">
     <div class="kago">
       <div class="line"></div><span>品物</span>
@@ -100,6 +101,7 @@
       <span style="text-align: right;float:right;margin-top: 20px;">税率8.0%は軽減税率対象商品です</span>
 
       <el-button type="success" style="margin-top: 20px;" @click="dialogFormVisible = true">注文へ</el-button>
+    <!-- ご注文手続き -->
       <el-dialog title="ご注文手続き" :visible.sync="dialogFormVisible" width=80%>
         <el-form :model="form">
           <el-table
@@ -168,13 +170,17 @@
           <el-button type="primary" @click="OrderInfo">お注文内容の確認に進む</el-button>
         </div>
       </el-dialog>
+    <!-- 注文確認 -->
       <el-dialog title="ご注文内容を確認してください" :visible.sync="dialogFormVisible2" width=80%>
         <el-form :model="form">
           <el-form-item label="お届け先" :label-width="formLabelWidth" >
             <el-select v-model="form.address" placeholder="お届け先">
-            <el-option label="東京都渋谷区神南2-2-1 放送センター内" value="3"></el-option>
-            <el-option label="東京都世田谷区砧1-10-11" value="2"></el-option>
-            <el-option label="東京都立川市曙町2-22-20 立川センタービル12F" value="3"></el-option>
+              <el-option
+                v-for="address in userAddressList"
+                :key="address.address_id"
+                :label="address.address"
+                :value="address.address"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="お支払方法" :label-width="formLabelWidth">
@@ -183,7 +189,7 @@
                 v-for="paymeth in paymethData"
                 :key="paymeth.Id"
                 :label="paymeth.name"
-                :value="paymeth.Id"
+                :value="paymeth.name"
               />
             </el-select>
           </el-form-item>           
@@ -209,6 +215,7 @@
         </div>
       </el-dialog>
   </div>
+  <!-- 配送状況 -->
   <div v-if="deliveryHistoryShow">
     <div class="kago">
       <div class="line"></div><span>配送状況</span>
@@ -225,7 +232,7 @@
         >
         <template slot-scope="scope">
           <div style="text-align: right;margin-top:25px" >
-            <span>{{scope.row.createtime | dataFormat('yyyy-MM-dd hh:mm:ss')}}</span>
+            <span>{{scope.row.createtime |formatDate()}}</span>
           </div>
         </template>
         </el-table-column>
@@ -265,6 +272,7 @@
         </el-table-column>
        </el-table>
   </div>
+  <!-- 注文履歴 -->
   <div v-if="orderHistoryShow">
     <div class="kago">
       <div class="line"></div><span>注文履歴</span>
@@ -281,7 +289,7 @@
         >
         <template slot-scope="scope">
           <div style="text-align: right;margin-top:25px" >
-            <span>{{scope.row.createtime | dataFormat('yyyy-MM-dd hh:mm:ss')}}</span>
+            <span>{{scope.row.createtime | formatDate()}}</span>
           </div>
         </template>
         </el-table-column>
@@ -322,7 +330,7 @@
           align="center"
         >
         <template slot-scope="scope" >
-          <div style="text-align: right;margin-top:25px"> 
+          <div @click="delInfo(scope.row.order_id)" style="text-align: right;margin-top:25px"> 
             <span>{{scope.row.status}}</span>
           </div>
         </template>
@@ -368,35 +376,13 @@ import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
 
-import Vue from 'vue'
-    Vue.filter('dataFormat', function (value, fmt) {
-    let getDate = new Date(value);
-    let o = {
-    'M+': getDate.getMonth() + 1,
-    'd+': getDate.getDate(),
-    'h+': getDate.getHours(),
-    'm+': getDate.getMinutes(),
-    's+': getDate.getSeconds(),
-    'q+': Math.floor((getDate.getMonth() + 3) / 3),
-    'S': getDate.getMilliseconds()
-    };
-    if (/(y+)/.test(fmt)) {
-    fmt = fmt.replace(RegExp.$1, (getDate.getFullYear() + '').substr(4 - RegExp.$1.length))
-    }
-    for (let k in o) {
-    if (new RegExp('(' + k + ')').test(fmt)) {
-      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
-    }
-    }
-    return fmt;
-    });
-
 export default {
   name: 'Footer',
   data () {
     return {
       activeIndex: '1',
       orderHistoryData:[],
+      userAddressList :[],
       orderDetailData:[],
       // tableData:[],
               tableData:[{'src':lj,'itemId':311,'prodName':'オランダなどの外国産 パプリカ（黄）1個','price':128,'num':2,'sui':0.08,'date':20201220,'state':'完了'},
@@ -473,9 +459,9 @@ export default {
             selectsql:
               "select rd.createtime,rd.order_info_id,rd.order_id,rd.price,rd.orderStatus,dv.status from ns_order rd"
               +" left join ns_dlv dv on rd.order_id = dv.order_id where  (rd.delflg is null or rd.delflg <> '1') "
-              +"and dv.last_flg = '1' and rd.user_id ="+this.userId 
+              +"and dv.last_flg = '1' and rd.user_id ="+this.userId
+              +" order by rd.createtime DESC"
           }
-        console.log("--------------0000000000000000000-------------")
         console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
@@ -486,7 +472,6 @@ export default {
         .catch(response => {
           console.log('Homepage getGoodsRsp  error!' + response)
         })
-        console.log(req)
         for (var item in this.orderHistoryData) {
           switch(this.orderHistoryData[item].status){
             case '0':
@@ -503,6 +488,23 @@ export default {
               break;
           }
         }
+        //ユーザー住所取得
+       var req2 = {
+            mode: 'select',
+            selectsql:
+              "select * from ns_user_address where user_id ="+this.userId 
+          }
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req2)
+        .then(response => {
+          console.log(response.data)
+          this.userAddressList = response.data.data
+        })
+        .catch(response => {
+          console.log('Homepage getGoodsRsp  error!' + response)
+        })
+        //配送状況データ取得
+
       },
     orderDetail: async function(id) {
         this.showDetail = true
@@ -557,13 +559,13 @@ export default {
             user_id: this.userId,
             price: this.orderPrice,
             payMeth: this.form.pay,
+            dlv_address: this.form.address,
             orderStatus: "1",
             delflg: "0",
             createtime: dateTime,
             createuser: "admin",
           }
         }
-        console.log(req1)
         await this.axios
           .post(this.$baseUrl + '/web.do', req1)
           .then(response => {
@@ -623,7 +625,15 @@ export default {
           this.dialogFormVisible2 = false
           this.dialogFormVisible = false
         console.log('submit!')
+        this.init()
+        //TODO
+        //购物车刷新
 
+      },
+      delInfo: function (id){
+         this.handleSelect(2)
+          console.log("-----------goto---配送状况")
+          console.log(id)
       },
       formatDate: function (value) {
         let date = new Date(value);
@@ -663,9 +673,6 @@ export default {
           this.visibleComponent = true
           console.log( 'ordersubmit'+this.visibleComponent)
         }
-      },
-      onSubmit(){
-        console.log('loginSubmit')
       },
          hidePop() {
         // 取消弹窗回调
