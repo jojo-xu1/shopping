@@ -367,10 +367,12 @@
           </el-dialog>
        </div>
   </div>
+
   <loginIndex :show="visibleLogin" @hidePop="hidePop" @submitPop="submitPop" @showSignup="showSignup">
   </loginIndex>
   <signupIndex :show="visibleSignup" @hidePop="hidePop" @submitPop="submitPop">
   </signupIndex>
+
   </div>
 
 </template>

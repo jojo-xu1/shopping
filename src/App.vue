@@ -48,14 +48,24 @@
   <div class="goCart" v-show="searchBarFixed" @click="handleSelect">
     <li>カードへ<i class="iconfont icon-jiantouxia"></i></li>
   </div>
+  <div class="goLogin" v-show="finishLogin == false" @click="loginSubmit">
+    ログイン<i class="iconfont icon-jiantouxia"></i>
+  </div>
+  <div class="goLogin" v-show="finishLogin" @click="logoutSubmit">
+    ログアウト<i class="iconfont icon-jiantouxia"></i>
+  </div>
+  <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
+  </loginIndex>
   </div>
 </template>
 
 <script>
 import Footer from '@/components/footer/Footer.vue'
+import loginIndex from '@/components/login/login.vue'
+
 export default {
   name: 'App',
-  components:{Footer},
+  components:{Footer,loginIndex},
   data(){
     return {
       input: '',
@@ -67,11 +77,21 @@ export default {
       listall: [
         { cat_id: 1, cat_name: 'xxx', parent_id: 0 }
       ],
-      searchBarFixed:true
+      searchBarFixed:true,
+      visibleComponent:false,
+      finishLogin:false
     }
   },
    mounted() {
      window.addEventListener("scroll", this.handleScroll, true);
+     var token = localStorage.getItem('tttocken');
+     if (token) {
+       console.log("has logined")
+       this.finishLogin = true
+     }else {
+       console.log("not yet logined")
+       this.finishLogin = false
+     }
    },
    methods: {
     async loadNode(node, resolve) {
@@ -148,6 +168,30 @@ export default {
         }
         }, 1);
       },
+      loginSubmit(){
+        this.visibleComponent = true
+      },
+      logoutSubmit(){
+        console.log("router")
+        console.log(this.$router)
+        localStorage.removeItem('tttocken')
+        localStorage.removeItem("cartList")
+        this.finishLogin = false
+        this.$message({
+            type: 'success',
+            message: 'ログアウトしました。'
+            })
+      },
+      hidePop() {
+        // 取消弹窗回调
+        this.visibleComponent = false
+      },
+      submitPop() {
+          // 确认弹窗回调
+          this.visibleComponent = false
+          console.log("has logined")
+          this.finishLogin = true
+      },
    }
 }
 </script>
@@ -198,6 +242,17 @@ width: 100%;
   cursor: pointer;
   padding: 10px;
   background: #67C23A;
+  color: #000000;
+  border: 1px solid #000000;
+}
+.goLogin{
+  text-align: center;
+  position: fixed;
+  right: 150px;
+  top: 10px;
+  cursor: pointer;
+  padding: 10px;
+  background: white;
   color: #000000;
   border: 1px solid #000000;
 }
