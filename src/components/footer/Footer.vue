@@ -377,14 +377,19 @@
           </el-dialog>
        </div>
   </div>
- <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
+
+  <loginIndex :show="visibleLogin" @hidePop="hidePop" @submitPop="submitPop" @showSignup="showSignup">
   </loginIndex>
+  <signupIndex :show="visibleSignup" @hidePop="hidePop" @submitPop="submitPop">
+  </signupIndex>
+
   </div>
 
 </template>
 
 <script>
 import loginIndex from '@/components/login/login.vue'
+import signupIndex from '@/components/login/signup.vue'
 
 export default {
   name: 'Footer',
@@ -420,7 +425,8 @@ export default {
       orderPrice : '',
       tempOrderId :'',
       deliveryHistoryShow:false,
-      visibleComponent: false,
+      visibleLogin: false,
+      visibleSignup: false,
       form: {
           address: '',
           pay: '',
@@ -438,7 +444,8 @@ export default {
      this.init()
    },
     components: {
-        loginIndex
+        loginIndex,
+        signupIndex
   },
 
   methods: {
@@ -766,10 +773,17 @@ export default {
       },
       hidePop() {
         // 取消弹窗回调
-        this.visibleComponent = false
+        if(popName == 'login') {
+          this.visibleLogin = false
+        } else if(popName == 'signup') {
+          this.visibleSignup = false
+        } else {
+          this.visibleLogin = false
+          this.visibleSignup = false
+        }
       },
       submitPop() {
-          // 确认弹窗回调
+          // 确认弹窗回
           this.visibleComponent = false   
           var token = localStorage.getItem('tttocken');
           if (token) {
