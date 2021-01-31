@@ -102,7 +102,7 @@
       </el-table>
       <span style="text-align: right;float:right;margin-top: 20px;">税率8.0%は軽減税率対象商品です</span>
 
-      <el-button type="success" style="margin-top: 20px;" @click="dialogFormVisible = true">注文へ</el-button>
+      <el-button type="success" style="margin-top: 20px;" @click="orderSubmit">注文へ</el-button>
     <!-- ご注文手続き -->
       <el-dialog title="ご注文手続き" :visible.sync="dialogFormVisible" width=80%>
         <el-form :model="form">
@@ -367,9 +367,12 @@
           </el-dialog>
        </div>
   </div>
-
+  <loginIndex :show="visibleLogin" @hidePop="hidePop" @submitPop="submitPop" @showSignup="showSignup">
+  </loginIndex>
+  <signupIndex :show="visibleSignup" @hidePop="hidePop" @submitPop="submitPop">
+  </signupIndex>
   </div>
- 
+
 </template>
 
 <script>
@@ -377,6 +380,8 @@ import lj from '@/assets/lj.jpg'
 import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
+import loginIndex from '@/components/login/login.vue'
+import signupIndex from '@/components/login/signup.vue'
 
 export default {
   name: 'Footer',
@@ -405,6 +410,8 @@ export default {
       orderPrice : '',
       tempOrderId :'',
       deliveryHistoryShow:false,
+      visibleLogin: false,
+      visibleSignup: false,
       form: {
           address: '',
           pay: '',
@@ -421,7 +428,10 @@ export default {
    mounted() {
      this.init()
    },
-   
+    components: {
+        loginIndex,
+        signupIndex
+  },
 
   methods: {
       handleSelect(key, keyPath) {
@@ -692,19 +702,33 @@ export default {
       },
       orderSubmit(){
         var token = localStorage.getItem('tttocken');
-        localStorage.removeItem('tttocken');
+        //localStorage.removeItem('tttocken');
         if(!token){
-          this.visibleComponent = true
-          console.log( 'ordersubmit'+this.visibleComponent)
+          this.visibleLogin = true
+          console.log( 'ordersubmit'+this.visibleLogin)
+        } else {
+          this.dialogFormVisible = true
         }
       },
-         hidePop() {
+      showSignup(){
+        console.log('signup')
+        this.visibleLogin = false
+          this.visibleSignup = true
+      },
+      hidePop(popName) {
         // 取消弹窗回调
-        this.visibleComponent = false
+        if(popName == 'login') {
+          this.visibleLogin = false
+        } else if(popName == 'signup') {
+          this.visibleSignup = false
+        } else {
+          this.visibleLogin = false
+          this.visibleSignup = false
+        }
       },
       submitPop() {
           // 确认弹窗回调
-          this.visibleComponent = false
+          this.visibleLogin = false
       },
       
       // 加载所有订单配送状况

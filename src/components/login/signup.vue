@@ -19,7 +19,7 @@
         <el-input v-model="form.confirmPasswd" type="password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">サインアップ</el-button>
+        <el-button type="primary" @click="onSubmit('form')">サインアップ</el-button>
         <el-button class="cancel" @click="cancelSubmit">キャンセル</el-button>
       </el-form-item>
     </el-form>
@@ -82,7 +82,15 @@ export default {
     // bubblesEffect
   },
   methods: {
-    async onSubmit() {
+    async onSubmit(formName) {
+      var validRslt = this.$refs[formName].validate((valid) => {
+        if (!valid) {
+          return false
+        }
+      });
+      if (!validRslt) {
+        return
+      }
       var req = {
         rscode: 'ok',
         mode: 'insert',
@@ -102,10 +110,10 @@ export default {
         .catch(response => {
           console.log('Homepage getGoodsRsp  error!' + response)
         })
-      this.$emit("hidePop", 'signup');
+      this.$emit("hidePop");
     },
     cancelSubmit() {
-      this.$emit("hidePop", 'signup');
+      this.$emit("hidePop");
       console.log(this)
     },
   },
