@@ -483,7 +483,6 @@ export default {
         this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
         console.log(this.userId)
       }
-
       this.tableData = JSON.parse(localStorage.getItem("cartList"))
         //配送状況データ取得
       this.setAllOrdhis()
@@ -689,10 +688,12 @@ export default {
         this.form.pay = ''
         this.form.address = ''
         this.form.arrivalTime = ''
-        //TODO
-        //购物车刷新
-        //this.tempOrderId 为空时不刷新
-
+        //this.tempOrderId 为空时购物车不清空
+        console.log(this.tempOrderId)
+        if(this.tempOrderId){
+          localStorage.setItem("cartList", "[]")
+          this.tableData = []
+        }
         this.tempOrderId = ''
 
       },
@@ -769,13 +770,12 @@ export default {
       },
       submitPop() {
           // 确认弹窗回调
-          this.visibleComponent = false
-          // var userDetails = localStorage.getItem('userDetails');
-          // if(!userDetails.user_id){
-          //   this.userId = userDetails.user_id
-          // }
-          // console.log(this.userId)
-          // console.log("------------11111111111111111111-------------000000000000000")
+          this.visibleComponent = false   
+          var token = localStorage.getItem('tttocken');
+          if (token) {
+            this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
+            console.log(this.userId)
+          }
       },      
       // 加载所有订单配送状况
       async setAllOrdhis(){
