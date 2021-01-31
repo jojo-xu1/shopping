@@ -75,7 +75,11 @@ export default {
           if (response.data.rscode === 'ok') {
             localStorage.setItem('tttocken',response.data.token)
             localStorage.setItem('userDetails',response.data.data)
-            this.$emit('hidePop')
+            this.$message({
+            type: 'success',
+            message: response.data.data.name+'ようこそ'
+            })
+            this.$emit('submitPop')
           } else {
             console.log('I am ng')
             this.$message({
