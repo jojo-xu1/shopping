@@ -10,7 +10,8 @@
           <el-input v-model="form.password" type="password"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">登録</el-button>
+          <el-button type="primary" class="primary" @click="onSubmit">登録</el-button>
+          <el-button type="primary" class="primary" @click="signup">サインアップ</el-button>
           <el-button class="cancel" @click="cancelSubmit">キャンセル</el-button>
         </el-form-item>
       </el-form>
@@ -92,6 +93,9 @@ export default {
           console.log('response error!' + response)
         })
     },
+    signup() {
+      this.$emit('showSignup')
+    },
     cancelSubmit() {
       this.form.username = ""
       this.form.password = ""
@@ -104,7 +108,7 @@ export default {
 
 <style scoped>
 .login-form {
-  width: 350px;
+  width: 370px;
   /* 上下嫌隙 160px，左右自动居中 */
   margin: 160px auto;
   background-color: rgb(255, 255, 255, 0.8);
@@ -129,9 +133,14 @@ export default {
   text-align: center;
 }
 
-.cancel {
-    margin-left: 60px; 
+.primary{
+  width: 126px;
 }
+
+.cancel {
+  width: 126px;
+    margin-left: 0; 
+} 
 
 .box {
      margin-left: 0px; 

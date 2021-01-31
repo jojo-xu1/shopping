@@ -367,8 +367,12 @@
           </el-dialog>
        </div>
   </div>
- <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
+
+  <loginIndex :show="visibleLogin" @hidePop="hidePop" @submitPop="submitPop" @showSignup="showSignup">
   </loginIndex>
+  <signupIndex :show="visibleSignup" @hidePop="hidePop" @submitPop="submitPop">
+  </signupIndex>
+
   </div>
 
 </template>
@@ -379,6 +383,7 @@ import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
 import loginIndex from '@/components/login/login.vue'
+import signupIndex from '@/components/login/signup.vue'
 
 export default {
   name: 'Footer',
@@ -407,7 +412,8 @@ export default {
       orderPrice : '',
       tempOrderId :'',
       deliveryHistoryShow:false,
-      visibleComponent: false,
+      visibleLogin: false,
+      visibleSignup: false,
       form: {
           address: '',
           pay: '',
@@ -425,7 +431,8 @@ export default {
      this.init()
    },
     components: {
-        loginIndex
+        loginIndex,
+        signupIndex
   },
 
   methods: {
@@ -699,19 +706,31 @@ export default {
         var token = localStorage.getItem('tttocken');
         //localStorage.removeItem('tttocken');
         if(!token){
-          this.visibleComponent = true
-          console.log( 'ordersubmit'+this.visibleComponent)
+          this.visibleLogin = true
+          console.log( 'ordersubmit'+this.visibleLogin)
         } else {
           this.dialogFormVisible = true
         }
       },
-      hidePop() {
+      showSignup(){
+        console.log('signup')
+        this.visibleLogin = false
+          this.visibleSignup = true
+      },
+      hidePop(popName) {
         // 取消弹窗回调
-        this.visibleComponent = false
+        if(popName == 'login') {
+          this.visibleLogin = false
+        } else if(popName == 'signup') {
+          this.visibleSignup = false
+        } else {
+          this.visibleLogin = false
+          this.visibleSignup = false
+        }
       },
       submitPop() {
           // 确认弹窗回调
-          this.visibleComponent = false
+          this.visibleLogin = false
       },
       
       // 加载所有订单配送状况
