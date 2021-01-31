@@ -59,7 +59,9 @@
           label="数量">
           <template slot-scope="scope">
               <div style="display:flex;justify-content: center;">
-                <el-input-number v-model="scope.row.num" controls-position="right"  :min="1" :max="10"></el-input-number>
+                <el-input-number v-model="scope.row.num" controls-position="right" :min="1" :max="10"
+                  @change="(value) => changeNumber(scope.$index, value, tableData)"
+                ></el-input-number>
               </div>
           </template>
         </el-table-column>
@@ -386,16 +388,12 @@ export default {
       orderDetailData:[],
       dlvHistoryData:[],
       // tableData:[],
-              tableData:[{'src':lj,'itemId':311,'prodName':'オランダなどの外国産 パプリカ（黄）1個','price':128,'num':2,'sui':0.08,'date':20201220,'state':'完了'},
-                 {'src':tmt,'itemId':312,'prodName':'トップバリグリーンアイ有機野菜 北海道などの国内産 350g 1袋','price':398,'num':1,'sui':0.08,'date':20201220,'state':'配達中'},
-                 {'src':rg,'itemId':313,'prodName':'茨城県などの国内産 レンコン 200g 1袋','price':496,'num':1,'sui':0.08,'date':20201220,'state':'完了'},
-                 {'src':dk,'itemId':314,'prodName':'青森・千葉県などの国内産 だいこん 1/2カット （葉の部分）','price':99,'num':1,'sui':0.08,'date':20201220,'state':'完了'},
-                ],
-                paymethData:[
-                  {'Id': 'P01','name':'クレジットカード'},
-                  {'Id': 'P02','name':'代金引換'},
-                  {'Id': 'P03','name':'ネット銀行でお支払い'},
-                ],
+      tableData:{},
+      paymethData:[
+        {'Id': 'P01','name':'クレジットカード'},
+        {'Id': 'P02','name':'代金引換'},
+        {'Id': 'P03','name':'ネット銀行でお支払い'},
+      ],
       userId:'1',
       shoppingcardShow:true,
       orderHistoryShow:false,
@@ -455,6 +453,14 @@ export default {
         }, 1);
       },
   init: async function() {
+      //注文リスト初期化
+      // localStorage.setItem("cartList", JSON.stringify([
+      //   {'src':lj,'itemId':311,'prodName':'オランダなどの外国産 パプリカ（黄）1個','price':128,'num':2,'sui':0.08,'date':20201220,'state':'完了'},
+      //   {'src':tmt,'itemId':312,'prodName':'トップバリグリーンアイ有機野菜 北海道などの国内産 350g 1袋','price':398,'num':1,'sui':0.08,'date':20201220,'state':'配達中'},
+      //   {'src':rg,'itemId':313,'prodName':'茨城県などの国内産 レンコン 200g 1袋','price':496,'num':1,'sui':0.08,'date':20201220,'state':'完了'},
+      //   {'src':dk,'itemId':314,'prodName':'青森・千葉県などの国内産 だいこん 1/2カット （葉の部分）','price':99,'num':1,'sui':0.08,'date':20201220,'state':'完了'}
+      // ]))
+      this.tableData = JSON.parse(localStorage.getItem("cartList"))
         //配送状況データ取得
       this.setAllOrdhis()
         //注文履歴初期化
@@ -674,8 +680,15 @@ export default {
          this.form.pay=''
          this.form.address=''
       },
+  changeNumber(index, value, rows){
+    rows[index].num = value
+    var cartList = JSON.stringify(rows)
+    localStorage.setItem("cartList", cartList)
+  },
   deleteRow(index, rows) {
         rows.splice(index, 1);
+        var cartList = JSON.stringify(rows)
+        localStorage.setItem("cartList", cartList)
       },
       orderSubmit(){
         var token = localStorage.getItem('tttocken');
