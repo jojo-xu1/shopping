@@ -168,14 +168,14 @@
 
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">キャンセル</el-button>
+          <el-button @click="orderCancel">キャンセル</el-button>
           <el-button type="primary" @click="OrderInfo">お注文内容の確認に進む</el-button>
         </div>
       </el-dialog>
     <!-- 注文確認 -->
       <el-dialog title="ご注文内容を確認してください" :visible.sync="dialogFormVisible2" width=80%>
         <el-form :model="form">
-          <el-form-item label="お届け先" :label-width="formLabelWidth" >
+          <el-form-item label="お届け先:" :label-width="formLabelWidth" >
             <el-select v-model="form.address" placeholder="お届け先">
               <el-option
                 v-for="address in userAddressList"
@@ -185,7 +185,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="お支払方法" :label-width="formLabelWidth">
+          <el-form-item label="お支払方法:" :label-width="formLabelWidth">
             <el-select v-model="form.pay" placeholder="お支払方法">
               <el-option
                 v-for="paymeth in paymethData"
@@ -194,13 +194,23 @@
                 :value="paymeth.name"
               />
             </el-select>
+          </el-form-item>
+          <el-form-item label="配送時間帯指定:" :label-width="formLabelWidth">
+            <el-select v-model="form.arrivalTime" placeholder="配送時間帯指定">
+              <el-option
+                v-for="time in arrivalTimeData"
+                :key="time.Id"
+                :label="time.name"
+                :value="time.name"
+              />
+            </el-select>
           </el-form-item>           
         </el-form>
         <el-table :data="tableData" style="width: 100%">
-              <el-table-column prop="prodName" label="商品名" width="200" />
-              <el-table-column prop="price" label="商品価格" width="350" />
-              <el-table-column prop="num" label="数量" width="125" />
-              <el-table-column  label="合計" width="50" >
+              <el-table-column prop="prodName" label="商品名" width="500" />
+              <el-table-column prop="price" label="商品価格" width="200" />
+              <el-table-column prop="num" label="数量" width="100" />
+              <el-table-column  label="合計" width="200" >
                 <template slot-scope="scope">
                   {{scope.row.sum =scope.row.price*scope.row.num}}
                 </template>
@@ -374,10 +384,6 @@
 </template>
 
 <script>
-import lj from '@/assets/lj.jpg'
-import tmt from '@/assets/tmt.jpg'
-import rg from '@/assets/rg.jpg'
-import dk from '@/assets/dk.jpg'
 import loginIndex from '@/components/login/login.vue'
 
 export default {
@@ -389,14 +395,21 @@ export default {
       userAddressList :[],
       orderDetailData:[],
       dlvHistoryData:[],
-      // tableData:[],
       tableData:{},
       paymethData:[
         {'Id': 'P01','name':'クレジットカード'},
         {'Id': 'P02','name':'代金引換'},
         {'Id': 'P03','name':'ネット銀行でお支払い'},
       ],
-      userId:'1',
+      arrivalTimeData:[
+        {'Id': 'A01','name':'当日午後'},
+        {'Id': 'A02','name':'翌日午前'},
+        {'Id': 'A03','name':'翌日午後１時前'},
+        {'Id': 'A04','name':'翌日午後１時～３時'},
+        {'Id': 'A05','name':'翌日午後３時～５時'},
+        {'Id': 'A06','name':'翌日午後５時～７時'},
+      ],
+      userId:'',
       shoppingcardShow:true,
       orderHistoryShow:false,
       showDetail:false,
@@ -465,6 +478,12 @@ export default {
       //   {'src':rg,'itemId':313,'prodName':'茨城県などの国内産 レンコン 200g 1袋','price':496,'num':1,'sui':0.08,'date':20201220,'state':'完了'},
       //   {'src':dk,'itemId':314,'prodName':'青森・千葉県などの国内産 だいこん 1/2カット （葉の部分）','price':99,'num':1,'sui':0.08,'date':20201220,'state':'完了'}
       // ]))
+      var token = localStorage.getItem('tttocken');
+      if (token) {
+        this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
+        console.log(this.userId)
+      }
+
       this.tableData = JSON.parse(localStorage.getItem("cartList"))
         //配送状況データ取得
       this.setAllOrdhis()
@@ -474,9 +493,10 @@ export default {
             selectsql:
               "select rd.createtime,rd.order_info_id,rd.order_id,rd.price,rd.orderStatus,dv.status from ns_order rd"
               +" left join ns_dlv dv on rd.order_id = dv.order_id where  (rd.delflg is null or rd.delflg <> '1') "
-              +"and dv.last_flg = '1' and rd.user_id ="+this.userId
+              +"and dv.last_flg = '1' and rd.user_id ='"+this.userId + "'"
               +" order by rd.createtime DESC"
           }
+          console.log(req)
       await this.axios
         .post(this.$baseUrl + '/web.do', req)
         .then(response => {
@@ -506,8 +526,10 @@ export default {
        var req2 = {
             mode: 'select',
             selectsql:
-              "select * from ns_user_address where user_id ="+this.userId 
+              "select * from ns_user_address where user_id = '"+this.userId + "'"
           }
+          console.log("---------2000000000000000000011------------")
+          console.log(req2)
       await this.axios
         .post(this.$baseUrl + '/web.do', req2)
         .then(response => {
@@ -563,6 +585,10 @@ export default {
         alert('お支払方法を入力して下さい。')
         return
       }
+       if (!this.form.arrivalTime) {
+        alert('配送時間帯指定して下さい。')
+        return
+      }
           //システム時間取得
           var  date1 =new Date();
           var dateTime = this.formatDate(Date.parse(date1))
@@ -577,6 +603,7 @@ export default {
             price: this.orderPrice,
             payMeth: this.form.pay,
             dlv_address: this.form.address,
+            arrival_time: this.form.arrivalTime,
             orderStatus: "1",
             delflg: "0",
             createtime: dateTime,
@@ -588,6 +615,12 @@ export default {
           .then(response => {
             console.log(response.data.data)
             this.tempOrderId = response.data.data
+            if(!this.tempOrderId){
+              alert('注文失敗！')
+              return
+            }else{
+              alert('注文成功！')
+            }
           })
           .catch(response => {
             console.log('Homepage getGoodsRsp  error!' + response)
@@ -609,6 +642,11 @@ export default {
           .post(this.$baseUrl + '/web.do', req2)
           .then(response => {
             console.log(response.data)
+            var tempdlvId = response.data.data
+            if(!tempdlvId){
+              alert('配送信息登録失敗！')
+              return
+            }
           })
           .catch(response => {
             console.log('Homepage getGoodsRsp  error!' + response)
@@ -634,6 +672,11 @@ export default {
           .post(this.$baseUrl + '/web.do', req3)
           .then(response => {
             console.log(response.data)
+             var tempdtlId = response.data.data
+            if(!tempdtlId){
+              alert('注文詳細登録失敗！')
+              return
+            }
           })
           .catch(response => {
             console.log('Homepage getGoodsRsp  error!' + response)
@@ -645,8 +688,12 @@ export default {
         this.init()
         this.form.pay = ''
         this.form.address = ''
+        this.form.arrivalTime = ''
         //TODO
         //购物车刷新
+        //this.tempOrderId 为空时不刷新
+
+        this.tempOrderId = ''
 
       },
       //配送状况へ
@@ -684,6 +731,7 @@ export default {
          this.dialogFormVisible2 = false
          this.form.pay=''
          this.form.address=''
+         this.form.arrivalTime = ''
       },
   changeNumber(index, value, rows){
     rows[index].num = value
@@ -701,9 +749,19 @@ export default {
         if(!token){
           this.visibleComponent = true
           console.log( 'ordersubmit'+this.visibleComponent)
-        } else {
+        } else { 
+        if(this.tableData === null || this.tableData.length <=0){
+        alert('お商品を選択して下さい。')
+        return
+        }
           this.dialogFormVisible = true
         }
+      },
+      orderCancel(){
+        this.dialogFormVisible = false 
+        this.form.pay = ''
+        this.form.address = ''
+        this.form.arrivalTime = ''
       },
       hidePop() {
         // 取消弹窗回调
@@ -712,16 +770,21 @@ export default {
       submitPop() {
           // 确认弹窗回调
           this.visibleComponent = false
-      },
-      
+          // var userDetails = localStorage.getItem('userDetails');
+          // if(!userDetails.user_id){
+          //   this.userId = userDetails.user_id
+          // }
+          // console.log(this.userId)
+          // console.log("------------11111111111111111111-------------000000000000000")
+      },      
       // 加载所有订单配送状况
       async setAllOrdhis(){
           var req = {
             mode: 'select',
             selectsql:
               " select d.createtime, d.order_id, d.status, o.order_info_id,o.dlv_address from ns_dlv d "
-              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') " 
-              + " order by o.createtime desc "
+              + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') and o.user_id = '"
+              +this.userId + "'" + " order by d.createtime desc "              
           }
         console.log("SLELCT TEST")
       await this.axios

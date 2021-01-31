@@ -505,10 +505,12 @@ export default {
           }
         }
         if(hasRecord === false){
-
+          if(this.cartList == null){
+            this.cartList = []
+          }
           let str = Number((addItem.taxprice/addItem.price)-1)
           var sui = str.toFixed(2)
-          var cartRecord = {'src':addItem.itemimg,'itemId':addItem.item_id,'prodName':addItem.item_name,'price':addItem.price,'num':1,'sui':sui}
+          var cartRecord = {'src':this.$webUrl + '/shopping/upimg/'+addItem.itemimg,'itemId':addItem.item_id,'prodName':addItem.item_name,'price':addItem.price,'num':1,'sui':sui}
           console.log("new record")
           console.log(cartRecord)
           this.cartList.push(cartRecord)
