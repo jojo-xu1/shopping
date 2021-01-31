@@ -102,7 +102,7 @@
       </el-table>
       <span style="text-align: right;float:right;margin-top: 20px;">税率8.0%は軽減税率対象商品です</span>
 
-      <el-button type="success" style="margin-top: 20px;" @click="dialogFormVisible = true">注文へ</el-button>
+      <el-button type="success" style="margin-top: 20px;" @click="orderSubmit">注文へ</el-button>
     <!-- ご注文手続き -->
       <el-dialog title="ご注文手続き" :visible.sync="dialogFormVisible" width=80%>
         <el-form :model="form">
@@ -367,9 +367,10 @@
           </el-dialog>
        </div>
   </div>
-
+ <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
+  </loginIndex>
   </div>
- 
+
 </template>
 
 <script>
@@ -377,6 +378,7 @@ import lj from '@/assets/lj.jpg'
 import tmt from '@/assets/tmt.jpg'
 import rg from '@/assets/rg.jpg'
 import dk from '@/assets/dk.jpg'
+import loginIndex from '@/components/login/login.vue'
 
 export default {
   name: 'Footer',
@@ -405,6 +407,7 @@ export default {
       orderPrice : '',
       tempOrderId :'',
       deliveryHistoryShow:false,
+      visibleComponent: false,
       form: {
           address: '',
           pay: '',
@@ -421,7 +424,9 @@ export default {
    mounted() {
      this.init()
    },
-   
+    components: {
+        loginIndex
+  },
 
   methods: {
       handleSelect(key, keyPath) {
@@ -692,13 +697,15 @@ export default {
       },
       orderSubmit(){
         var token = localStorage.getItem('tttocken');
-        localStorage.removeItem('tttocken');
+        //localStorage.removeItem('tttocken');
         if(!token){
           this.visibleComponent = true
           console.log( 'ordersubmit'+this.visibleComponent)
+        } else {
+          this.dialogFormVisible = true
         }
       },
-         hidePop() {
+      hidePop() {
         // 取消弹窗回调
         this.visibleComponent = false
       },
