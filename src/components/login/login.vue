@@ -75,7 +75,7 @@ export default {
           console.log(response.data)
           if (response.data.rscode === 'ok') {
             localStorage.setItem('tttocken',response.data.token)
-            localStorage.setItem('userDetails',response.data.data)
+            localStorage.setItem('userDetails',JSON.stringify(response.data.data))
             this.$message({
             type: 'success',
             message: response.data.data.name+'ようこそ'
