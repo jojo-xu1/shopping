@@ -33,17 +33,17 @@
     </el-aside>
     <el-main style="background-color: blanchedalmond;margin-top:0px;margin-left:0px;padding:0;overflow:hidden;">
       <keep-alive v-if="$route.meta.keepAlive">
-        <router-view/>
+        <router-view @refreshTable="refreshTable" />
       </keep-alive>
         <!--<FooterGuide  />-->
-      <router-view v-if="!$route.meta.keepAlive">
+      <router-view v-if="!$route.meta.keepAlive" @refreshTable="refreshTable">
         <!-- 这里是不被缓存的视图组件，比如 page3 -->
       </router-view>
 
     </el-main>
 
   </el-container>
-  <Footer/>
+  <Footer ref='footer'/>
   <div class="gotop" v-show="gotop" @click="toTop">Top</div>
   <div class="goCart" v-show="searchBarFixed" @click="handleSelect">
     <li>カードへ<i class="iconfont icon-jiantouxia"></i></li>
@@ -186,6 +186,10 @@ export default {
         localStorage.removeItem('tttocken')
         localStorage.removeItem("cartList")
         this.finishLogin = false
+        this.$refs.footer.shoppingcardShow = true
+        this.$refs.footer.deliveryHistoryShow = false
+        this.$refs.footer.orderHistoryShow = false
+        this.$refs.footer.activeIndex = 1
         this.$message({
             type: 'success',
             message: 'ログアウトしました。'
@@ -208,6 +212,10 @@ export default {
           console.log("has logined")
           this.finishLogin = true
       },
+      refreshTable(){
+        console.log("i am in")
+        this.$refs.footer.init()
+      }
    }
 }
 </script>
