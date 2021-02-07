@@ -19,7 +19,9 @@
         <el-input v-model="form.confirmPasswd" type="password"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit('form')">サインアップ</el-button>
+        <el-button type="primary" @click="onSubmit('form')"
+          >サインアップ</el-button
+        >
         <el-button class="cancel" @click="cancelSubmit">キャンセル</el-button>
       </el-form-item>
     </el-form>
@@ -55,7 +57,7 @@ export default {
       },
       form_rules: {
         username: [
-          { required: true, message: "ユーザーは必須", trigger: "blur" },
+          { required: true, message: "メールは必須", trigger: "blur" },
         ],
         passwd: [
           { required: true, message: "パスワードは必須", trigger: "blur" },
@@ -83,37 +85,108 @@ export default {
   },
   methods: {
     async onSubmit(formName) {
-      var validRslt = false
+      var validRslt = false;
       this.$refs[formName].validate((valid) => {
-        validRslt = valid
+        validRslt = valid;
       });
       if (!validRslt) {
-        return
+        return;
       }
       var req = {
-        rscode: 'ok',
-        mode: 'insert',
-        tableName: 'sys_users',
-        data: { username: this.form.username, password: this.form.passwd }
-      }
+        rscode: "ok",
+        mode: "insert",
+        tableName: "ns_user_list",
+        data: {
+          mail: this.form.username,
+          password: this.form.passwd,
+          user_id: this.form.username,
+          name: this.form.username,
+          display_name: this.form.username,
+          kata_name: this.form.username,
+          sex: 0,
+          birthday: "1900-01-01",
+        },
+      };
       await this.axios
-        .post(this.$baseUrl + '/web.do', req)
-        .then(response => {
-          if (response.data.rscode === 'ok') {
+        .post(this.$baseUrl + "/web.do", req)
+        .then((response) => {
+          if (response.data.rscode === "ok") {
             this.$message({
-              type: 'success',
-              message: 'サインアップできました'
-            })
+              type: "success",
+              message: "サインアップできました",
+            });
+            // login begin
+            this.axios
+              .post(
+                this.$baseUrl + "/login?mail=" + this.form.username + "&password=" + this.form.passwd
+              )
+              .then((response) => {
+                if (response.data.rscode === "ok") {
+                  localStorage.setItem("tttocken", response.data.token);
+                  localStorage.setItem(
+                    "userDetails",
+                    JSON.stringify(response.data.data)
+                  );
+                  this.$message({
+                    type: "success",
+                    message: response.data.data.name + "ようこそ",
+                  });
+                  this.$emit("submitPop");
+                } else {
+                  console.log("I am ng");
+                  this.$message({
+                    type: "error",
+                    message: "自動ログイン失敗しました",
+                  });
+                }
+              })
+              .catch((response) => {
+                console.log("response error!" + response);
+              });
+          }
+          // login end
+        })
+        .catch((response) => {
+          console.log("Homepage getGoodsRsp  error!" + response);
+        });
+      this.$emit("hidePop");
+    },
+    login() {
+      this.axios
+        .post(
+          this.$baseUrl +
+            "/login?mail=" +
+            this.form.username +
+            "&password=" +
+            this.form.password
+        )
+        .then((response) => {
+          if (response.data.rscode === "ok") {
+            localStorage.setItem("tttocken", response.data.token);
+            localStorage.setItem(
+              "userDetails",
+              JSON.stringify(response.data.data)
+            );
+            this.$message({
+              type: "success",
+              message: response.data.data.name + "ようこそ",
+            });
+            this.$emit("submitPop");
+          } else {
+            console.log("I am ng");
+            this.$message({
+              type: "error",
+              message: "自動ログイン失敗しました",
+            });
           }
         })
-        .catch(response => {
-          console.log('Homepage getGoodsRsp  error!' + response)
-        })
-      this.$emit("hidePop");
+        .catch((response) => {
+          console.log("response error!" + response);
+        });
     },
     cancelSubmit() {
       this.$emit("hidePop");
-      console.log(this)
+      console.log(this);
     },
   },
 };
