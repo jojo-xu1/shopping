@@ -18,10 +18,11 @@
       <el-form-item label="パスワードの認証" class="box" prop="confirmPasswd">
         <el-input v-model="form.confirmPasswd" type="password"></el-input>
       </el-form-item>
+      <el-form-item label="アドレス" class="box" prop="address">
+        <el-input v-model="form.address" type="textarea" :rows="3"></el-input>
+      </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit('form')"
-          >サインアップ</el-button
-        >
+        <el-button type="primary" @click="onSubmit('form')">サインアップ</el-button>
         <el-button class="cancel" @click="cancelSubmit">キャンセル</el-button>
       </el-form-item>
     </el-form>
@@ -62,6 +63,9 @@ export default {
         passwd: [
           { required: true, message: "パスワードは必須", trigger: "blur" },
         ],
+        address: [
+          { required: true, message: "アドレスは必須", trigger: "blur" },
+        ],
         confirmPasswd: [
           {
             required: true,
@@ -92,7 +96,7 @@ export default {
       if (!validRslt) {
         return;
       }
-      var req = {
+      var req1 = {
         rscode: "ok",
         mode: "insert",
         tableName: "ns_user_list",
@@ -107,45 +111,61 @@ export default {
           birthday: "1900-01-01",
         },
       };
+      var req2 = {
+        rscode: "ok",
+        mode: "insert",
+        tableName: "ns_user_address",
+        data: {
+          user_id: this.form.username,
+          receive_name: "アドレス",
+          address: this.form.address,
+          number: "1",
+          postcode: "1110001"
+        },
+      };
       await this.axios
-        .post(this.$baseUrl + "/web.do", req)
+        .post(this.$baseUrl + "/web.do", req1)
         .then((response) => {
           if (response.data.rscode === "ok") {
-            this.$message({
-              type: "success",
-              message: "サインアップできました",
-            });
-            // login begin
             this.axios
-              .post(
-                this.$baseUrl + "/login?mail=" + this.form.username + "&password=" + this.form.passwd
-              )
+              .post(this.$baseUrl + "/web.do", req2)
               .then((response) => {
                 if (response.data.rscode === "ok") {
-                  localStorage.setItem("tttocken", response.data.token);
-                  localStorage.setItem(
-                    "userDetails",
-                    JSON.stringify(response.data.data)
-                  );
                   this.$message({
                     type: "success",
-                    message: response.data.data.name + "ようこそ",
+                    message: "サインアップできました",
                   });
-                  this.$emit("submitPop");
-                } else {
-                  console.log("I am ng");
-                  this.$message({
-                    type: "error",
-                    message: "自動ログイン失敗しました",
-                  });
+                  // login begin
+                  this.axios
+                    .post(this.$baseUrl + "/login?mail=" + this.form.username + "&password=" + this.form.passwd)
+                    .then((response) => {
+                      if (response.data.rscode === "ok") {
+                        localStorage.setItem("tttocken", response.data.token);
+                        localStorage.setItem(
+                          "userDetails",
+                          JSON.stringify(response.data.data)
+                        );
+                        this.$message({
+                          type: "success",
+                          message: response.data.data.name + "ようこそ",
+                        });
+                        this.$emit("submitPop");
+                      } else {
+                        console.log("I am ng");
+                        this.$message({
+                          type: "error",
+                          message: "自動ログイン失敗しました",
+                        });
+                      }
+                    // login end
+                    })
+                    .catch((response) => {
+                      console.log("response error!" + response);
+                    });
                 }
-              })
-              .catch((response) => {
-                console.log("response error!" + response);
               });
-          }
-          // login end
-        })
+            }
+          })
         .catch((response) => {
           console.log("Homepage getGoodsRsp  error!" + response);
         });
