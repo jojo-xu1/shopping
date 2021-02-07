@@ -145,7 +145,7 @@ export default {
 
 .signup {
   width: 126px;
-  margin-left: 0;
+  margin-left: 0 !important;
   margin-top: 5px;
 }
 
