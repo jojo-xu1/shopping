@@ -50,7 +50,7 @@
                 税込価格
             </div>
             <div style="font-size:1.2rem;text-align: right;margin-bottom: 10px;">
-                {{(scope.row.price*(1+scope.row.sui)).toFixed(2)}}円
+                {{(scope.row.price*(1+scope.row.sui*1)).toFixed(2)}}円
             </div>
           </template>
         </el-table-column>
@@ -455,11 +455,12 @@ export default {
           this.deliveryHistoryShow = false
           this.orderHistoryShow = false
            }else if(key == 2){
-          this.setAllOrdhis()
+          this.getAllOrdhis()
           this.shoppingcardShow =false
           this.deliveryHistoryShow = true
           this.orderHistoryShow = false
         }else if(key == 3){
+          this.getOrderHistory()
           this.shoppingcardShow =false
           this.deliveryHistoryShow = false
           this.orderHistoryShow = true
@@ -485,66 +486,23 @@ export default {
       //   {'src':rg,'itemId':313,'prodName':'茨城県などの国内産 レンコン 200g 1袋','price':496,'num':1,'sui':0.08,'date':20201220,'state':'完了'},
       //   {'src':dk,'itemId':314,'prodName':'青森・千葉県などの国内産 だいこん 1/2カット （葉の部分）','price':99,'num':1,'sui':0.08,'date':20201220,'state':'完了'}
       // ]))
-      var token = localStorage.getItem('tttocken');
-      if (token) {
-        this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
-        console.log(this.userId)
-      }
+      // var token = localStorage.getItem('tttocken');
+      // if (token) {
+      //   this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
+      //   console.log(this.userId)
+      // }
+
+      //UserId取得
+      this.getUserState()
+
+      //カードデータ取得
       this.tableData = JSON.parse(localStorage.getItem("cartList"))
+
         //配送状況データ取得
-      this.setAllOrdhis()
-        //注文履歴初期化
-      var req = {
-            mode: 'select',
-            selectsql:
-              "select rd.createtime,rd.order_info_id,rd.order_id,rd.price,rd.orderStatus,dv.status from ns_order rd"
-              +" left join ns_dlv dv on rd.order_id = dv.order_id where  (rd.delflg is null or rd.delflg <> '1') "
-              +"and dv.last_flg = '1' and rd.user_id ='"+this.userId + "'"
-              +" order by rd.createtime DESC"
-          }
-          console.log(req)
-      await this.axios
-        .post(this.$baseUrl + '/web.do', req)
-        .then(response => {
-          console.log(response.data)
-          this.orderHistoryData = response.data.data
-        })
-        .catch(response => {
-          console.log('Homepage getGoodsRsp  error!' + response)
-        })
-        for (var item in this.orderHistoryData) {
-          switch(this.orderHistoryData[item].status){
-            case '0':
-              this.orderHistoryData[item].status = "未出荷"
-              break;
-            case '1':
-              this.orderHistoryData[item].status = "出荷済み"
-              break;
-            case '2':
-              this.orderHistoryData[item].status = "配達済み"
-              break;
-            case '3':
-              this.orderHistoryData[item].status = "キャンセル"
-              break;
-          }
-        }
-        //ユーザー住所取得
-       var req2 = {
-            mode: 'select',
-            selectsql:
-              "select * from ns_user_address where user_id = '"+this.userId + "'"
-          }
-          console.log("---------2000000000000000000011------------")
-          console.log(req2)
-      await this.axios
-        .post(this.$baseUrl + '/web.do', req2)
-        .then(response => {
-          console.log(response.data)
-          this.userAddressList = response.data.data
-        })
-        .catch(response => {
-          console.log('Homepage getGoodsRsp  error!' + response)
-        })
+      this.getAllOrdhis()
+
+      //注文履歴データ取得
+      this.getOrderHistory()
          
       },
     orderDetail: async function(id) {
@@ -725,15 +683,47 @@ export default {
         s = s < 10 ? ('0' + s) : s;
         return y + '-' + MM + '-' + d + ' ' + h + ':' + m + ':' + s;
       },
-  OrderInfo() {
-         this.dialogFormVisible = false
-         this.dialogFormVisible2 = true
-         var sumPrice = 0
-         for (var item in this.tableData) {
-          sumPrice +=this.tableData[item].price*this.tableData[item].num*(1+this.tableData[item].sui)
+      getUserState(){
+        var token = localStorage.getItem('tttocken');
+        if (token) {
+          this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
+          }else{
+            this.userId = ''
           }
-         this.orderPrice = Math.ceil(sumPrice)
       },
+      getuserAddress: async function(){
+        var req = {
+      mode: 'select',
+      selectsql:
+        "select * from ns_user_address where user_id = '"+this.userId + "'"
+    }
+    await this.axios
+      .post(this.$baseUrl + '/web.do', req)
+      .then(response => {
+        console.log(response.data)
+        this.userAddressList = response.data.data
+      })
+      .catch(response => {
+        console.log('Homepage getGoodsRsp  error!' + response)
+      })
+      },
+  OrderInfo() {
+    
+      //UserId取得
+      this.getUserState()
+      
+    if(this.userId){
+      this.getuserAddress()
+      this.dialogFormVisible = false
+      this.dialogFormVisible2 = true
+      var sumPrice = 0
+      for (var item in this.tableData) {
+      sumPrice +=this.tableData[item].price*this.tableData[item].num*(1+this.tableData[item].sui*1)
+      }
+      this.orderPrice = Math.ceil(sumPrice)
+    }
+    },
+    //注文画面へ戻り
   bktSetOrd() {
          this.dialogFormVisible = true
          this.dialogFormVisible2 = false
@@ -770,7 +760,7 @@ export default {
         this.visibleLogin = false
           this.visibleSignup = true
       },
-      orderCancel(){
+orderCancel(){
         this.dialogFormVisible = false 
         this.form.pay = ''
         this.form.address = ''
@@ -788,16 +778,21 @@ export default {
         }
       },
       submitPop() {
-          // 确认弹窗回
-          this.visibleLogin = false   
-          var token = localStorage.getItem('tttocken');
-          if (token) {
-            this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
-            console.log(this.userId)
-          }
+        // 确认弹窗回
+        this.visibleLogin = false   
+        var token = localStorage.getItem('tttocken');
+        if (token) {
+          this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
+          console.log(this.userId)
+        }
+        this.$parent.submitPop() 
       },      
       // 加载所有订单配送状况
-      async setAllOrdhis(){
+      async getAllOrdhis(){
+
+      //UserId取得
+      this.getUserState()
+
           var req = {
             mode: 'select',
             selectsql:
@@ -833,12 +828,54 @@ export default {
           }
         }
       },
+      async getOrderHistory(){
+
+        
+      //UserId取得
+      this.getUserState()
+
+        var req = {
+            mode: 'select',
+            selectsql:
+              "select rd.createtime,rd.order_info_id,rd.order_id,rd.price,rd.orderStatus,dv.status from ns_order rd"
+              +" left join ns_dlv dv on rd.order_id = dv.order_id where  (rd.delflg is null or rd.delflg <> '1') "
+              +"and dv.last_flg = '1' and rd.user_id ='"+this.userId + "'"
+              +" order by rd.createtime DESC"
+          }
+          console.log(req)
+      await this.axios
+        .post(this.$baseUrl + '/web.do', req)
+        .then(response => {
+          console.log(response.data)
+          this.orderHistoryData = response.data.data
+        })
+        .catch(response => {
+          console.log('Homepage getGoodsRsp  error!' + response)
+        })
+        for (var item in this.orderHistoryData) {
+          switch(this.orderHistoryData[item].status){
+            case '0':
+              this.orderHistoryData[item].status = "未出荷"
+              break;
+            case '1':
+              this.orderHistoryData[item].status = "出荷済み"
+              break;
+            case '2':
+              this.orderHistoryData[item].status = "配達済み"
+              break;
+            case '3':
+              this.orderHistoryData[item].status = "キャンセル"
+              break;
+          }
+        }
+
+      },
       // 配送状況検索
       async setDlvhis(order_id){
       var req = {
             mode: 'select',
             selectsql:
-              " select d.createtime, d.order_id, d.status, o.order_info_id from ns_dlv d "
+              " select d.createtime, d.order_id, d.status, o.order_info_id,o.dlv_address from ns_dlv d "
               + " left join ns_order o on d.order_id = o.order_id where (o.delflg is null or o.delflg <> '1') "
               + " and d.order_id = " + order_id 
               + " order by d.createtime desc "

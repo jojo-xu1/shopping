@@ -146,6 +146,7 @@ export default {
 .signup {
   width: 126px;
   margin-left: 0;
+  margin-top: 5px;
 }
 
 .box {
