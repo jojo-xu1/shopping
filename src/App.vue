@@ -54,18 +54,21 @@
   <div class="goLogin" v-show="finishLogin" @click="logoutSubmit">
     ログアウト<i class="iconfont icon-jiantouxia"></i>
   </div>
-  <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop">
+  <loginIndex :show="visibleComponent" @hidePop="hidePop" @submitPop="submitPop" @showSignup="showSignup">
   </loginIndex>
+   <signupIndex :show="visibleSignup" @hidePop="hidePop" @submitPop="submitPop">
+  </signupIndex>
   </div>
 </template>
 
 <script>
 import Footer from '@/components/footer/Footer.vue'
 import loginIndex from '@/components/login/login.vue'
+import signupIndex from '@/components/login/signup.vue'
 
 export default {
   name: 'App',
-  components:{Footer,loginIndex},
+  components:{Footer,loginIndex,signupIndex},
   data(){
     return {
       input: '',
@@ -79,6 +82,7 @@ export default {
       ],
       searchBarFixed:true,
       visibleComponent:false,
+      visibleSignup:false,
       finishLogin:false
     }
   },
@@ -171,6 +175,11 @@ export default {
       loginSubmit(){
         this.visibleComponent = true
       },
+      showSignup(){
+        console.log('signup')
+        this.visibleComponent = false
+          this.visibleSignup = true
+      },
       logoutSubmit(){
         console.log("router")
         console.log(this.$router)
@@ -182,9 +191,16 @@ export default {
             message: 'ログアウトしました。'
             })
       },
-      hidePop() {
+      hidePop(popName) {
         // 取消弹窗回调
-        this.visibleComponent = false
+        if(popName == 'login') {
+          this.visibleComponent = false
+        } else if(popName == 'signup') {
+          this.visibleSignup = false
+        } else {
+          this.visibleComponent = false
+          this.visibleSignup = false
+        }
       },
       submitPop() {
           // 确认弹窗回调
