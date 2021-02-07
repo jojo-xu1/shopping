@@ -50,7 +50,7 @@
                 税込価格
             </div>
             <div style="font-size:1.2rem;text-align: right;margin-bottom: 10px;">
-                {{(scope.row.price*(1+scope.row.sui*1)).toFixed(2)}}円
+                {{scope.row.taxprice}}円
             </div>
           </template>
         </el-table-column>
@@ -82,7 +82,7 @@
                外税
             </div>
             <div style="text-align: right;font-size:1rem;">
-                {{scope.row.sui*100+'.0%'}}
+                {{Math.round(scope.row.sui*100)+'.0%'}}
             </div>
           </template>
         </el-table-column>
@@ -718,7 +718,7 @@ export default {
       this.dialogFormVisible2 = true
       var sumPrice = 0
       for (var item in this.tableData) {
-      sumPrice +=this.tableData[item].price*this.tableData[item].num*(1+this.tableData[item].sui*1)
+      sumPrice +=this.tableData[item].taxprice*this.tableData[item].num
       }
       this.orderPrice = Math.ceil(sumPrice)
     }
