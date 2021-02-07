@@ -486,12 +486,8 @@ export default {
     },
     async addToCart(addItem){
       this.cartList = []
-
-      //await this.axios.get(this.$baseUrl + '/cat-info').then((response)=>{
         console.log('get cat info')
         //console.log(response.data)
-        //this.cartList = response.data.tableData
-        //localStorage.removeItem('tableData')
         var records = localStorage.getItem('cartList')
         console.log(records)
         this.cartList = JSON.parse(records)
@@ -526,11 +522,7 @@ export default {
         }).catch((response)=>{
           console.log("cat-modify error!" + response);
         })
-
-      //}).catch((response)=>{
-      //  console.log("cat-info error!" + response);
-      //})
-
+        this.$emit('refreshTable')
     }
   }
 }
