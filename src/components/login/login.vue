@@ -94,6 +94,7 @@ export default {
         })
     },
     signup() {
+      console.log('pressSignup')
       this.$emit('showSignup')
     },
     cancelSubmit() {

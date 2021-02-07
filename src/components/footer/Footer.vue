@@ -755,7 +755,7 @@ export default {
         var token = localStorage.getItem('tttocken');
         //localStorage.removeItem('tttocken');
         if(!token){
-          this.visibleComponent = true
+          this.visibleLogin = true
           console.log( 'ordersubmit'+this.visibleComponent)
         } else { 
         if(this.tableData === null || this.tableData.length <=0){
@@ -765,13 +765,18 @@ export default {
           this.dialogFormVisible = true
         }
       },
+      showSignup(){
+        console.log('signup')
+        this.visibleLogin = false
+          this.visibleSignup = true
+      },
       orderCancel(){
         this.dialogFormVisible = false 
         this.form.pay = ''
         this.form.address = ''
         this.form.arrivalTime = ''
       },
-      hidePop() {
+      hidePop(popName) {
         // 取消弹窗回调
         if(popName == 'login') {
           this.visibleLogin = false
@@ -784,7 +789,7 @@ export default {
       },
       submitPop() {
           // 确认弹窗回
-          this.visibleComponent = false   
+          this.visibleLogin = false   
           var token = localStorage.getItem('tttocken');
           if (token) {
             this.userId = JSON.parse(localStorage.getItem('userDetails')).user_id
