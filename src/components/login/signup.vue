@@ -83,10 +83,9 @@ export default {
   },
   methods: {
     async onSubmit(formName) {
-      var validRslt = this.$refs[formName].validate((valid) => {
-        if (!valid) {
-          return false
-        }
+      var validRslt = false
+      this.$refs[formName].validate((valid) => {
+        validRslt = valid
       });
       if (!validRslt) {
         return

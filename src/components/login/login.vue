@@ -10,9 +10,9 @@
           <el-input v-model="form.password" type="password"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="primary" @click="onSubmit">登録</el-button>
-          <el-button type="primary" class="primary" @click="signup">サインアップ</el-button>
+          <el-button type="primary" class="primary" @click="onSubmit">ログイン</el-button>
           <el-button class="cancel" @click="cancelSubmit">キャンセル</el-button>
+          <el-button type="primary" class="signup" @click="signup">会員登録</el-button>
         </el-form-item>
       </el-form>
       
@@ -140,8 +140,13 @@ export default {
 
 .cancel {
   width: 126px;
-    margin-left: 0; 
-} 
+  margin-left: 10px; 
+}
+
+.signup {
+  width: 126px;
+  margin-left: 0;
+}
 
 .box {
      margin-left: 0px; 
